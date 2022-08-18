@@ -54,8 +54,6 @@ ApiEnvironment.DataAndCacheDirectoriesBuild();
 
 await ApiEnvironment.GetEntropyBytes();
 
-ApiEnvironment.UpdateDbContexts();
-
 // Expose development environment API endpoints if set in settings to do so
 if (ApiEnvironment.ShowDevEnvEndpoints)
 {
@@ -94,6 +92,9 @@ else
 {
     builder.Services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration, "ZeroConf:AzureAd");
 }
+
+// If this is initial run or there are new DB migrations they will be executed
+await ApiEnvironment.UpdateDbContexts();
 
 // No secrets from dev so let's try our prod secrets
 if (string.IsNullOrEmpty(ApiEnvironment.Secrets.TenantId) || string.IsNullOrWhiteSpace(ApiEnvironment.Secrets.TenantId))

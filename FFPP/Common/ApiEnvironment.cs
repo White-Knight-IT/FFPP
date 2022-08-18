@@ -227,7 +227,7 @@ namespace FFPP.Common
         /// <summary>
         /// Update DB with latest migrations
         /// </summary>
-        public static async void UpdateDbContexts()
+        public static async Task<bool> UpdateDbContexts()
         {
             try
             {
@@ -245,11 +245,15 @@ namespace FFPP.Common
                 {
                     await userProfilesDb.Database.MigrateAsync();
                 }
+
+                return true;
             }
             catch
             {
                 Console.WriteLine("Didn't create DB tables, this is expected if they already exist");
             }
+
+            return false;
         }
 
         public static async Task<byte[]> GetEntropyBytes()
