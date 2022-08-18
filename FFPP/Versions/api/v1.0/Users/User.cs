@@ -569,7 +569,7 @@ namespace FFPP.Api.v10.Users
             }
             catch(Exception ex)
             {
-                FfppLogsDbContext.DebugConsoleWrite(string.Format("Exception in ListUserDevices: {0} Inner Exception: {1}", ex.Message, ex.InnerException.Message ?? string.Empty));
+                FfppLogsDbContext.DebugConsoleWrite($"Exception in ListUserDevices: {ex.Message}");
                 throw;
             }
 

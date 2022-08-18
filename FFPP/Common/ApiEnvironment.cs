@@ -139,7 +139,7 @@ namespace FFPP.Common
             {
                 FfppLogsDbThreadSafeCoordinator.ThreadSafeAdd(new FfppLogsDbContext.LogEntry()
                 {
-                    Message = $"Exception GetDeviceId: {ex.Message} Inner Exception: {ex.InnerException.Message ?? string.Empty}",
+                    Message = $"Exception GetDeviceId: {ex.Message}",
                     Username = "FFPP",
                     Severity = "Error",
                     API = "GetDeviceId"
@@ -154,12 +154,9 @@ namespace FFPP.Common
             try
             {
                 JsonElement plainSecrets;
-                FileStream encryptedSecrets;
 
                 if (!File.Exists(CipherTextFilePath))
                 {
-                    encryptedSecrets = new FileStream(CipherTextFilePath, FileMode.Create);
-
                     if (!File.Exists(PlainTextFilePath))
                     {
                         // No encrypted secrets and no plain secrets to ingest, uh oh, sad face
@@ -170,16 +167,15 @@ namespace FFPP.Common
                     {
                         string plainSecretsJsonString = await File.ReadAllTextAsync(PlainTextFilePath);
                         // We have a plain secrets file to ingest, encrypt and then dispose of
-                         plainSecrets = (JsonElement)JsonSerializer.Deserialize(plainSecretsJsonString, typeof(JsonElement));
+                        plainSecrets = (JsonElement)JsonSerializer.Deserialize(plainSecretsJsonString, typeof(JsonElement));
 
-                        // Write encrypted secrets file
                         await File.WriteAllTextAsync(CipherTextFilePath, await Utilities.Crypto.AesEncrypt(plainSecretsJsonString, await GetDeviceId()));
 
                     }
                     catch(Exception ex)
                     {
-                        FfppLogsDbContext.DebugConsoleWrite(string.Format("Invalid JSON in plain.secrets.json file! {0} {1}", ex.Message, ex.InnerException.Message ?? string.Empty));
-                        throw new Exception(string.Format("Invalid JSON in plain.secrets.json file! {0} {1}",ex.Message, ex.InnerException.Message ?? string.Empty));
+                        FfppLogsDbContext.DebugConsoleWrite($"Invalid JSON in plain.secrets.json file! {ex.Message}");
+                        throw new Exception($"Invalid JSON in plain.secrets.json file! {ex.Message}");
                     }
 
                     // Overwrite plain.secrets.json file
@@ -203,7 +199,7 @@ namespace FFPP.Common
             {
                 FfppLogsDbThreadSafeCoordinator.ThreadSafeAdd(new FfppLogsDbContext.LogEntry()
                 {
-                    Message = $"Exception Encrypting or Decrypting Secrets (GetProductionSecrets): {ex.Message} Inner Exception: {ex.InnerException.Message ?? string.Empty}",
+                    Message = $"Exception Encrypting or Decrypting Secrets (GetProductionSecrets): {ex.Message} ",
                     Username = "FFPP",
                     Severity = "Error",
                     API = "GetProductionSecrets"
@@ -284,7 +280,7 @@ namespace FFPP.Common
             {
                 FfppLogsDbThreadSafeCoordinator.ThreadSafeAdd(new FfppLogsDbContext.LogEntry()
                 {
-                    Message = $"Exception GetDeviceIdToken: {ex.Message} Inner Exception: {ex.InnerException.Message ?? string.Empty}",
+                    Message = $"Exception GetDeviceIdToken: {ex.Message}",
                     Username = "FFPP",
                     Severity = "Error",
                     API = "GetDeviceIdTokenSeed"

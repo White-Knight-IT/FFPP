@@ -165,7 +165,7 @@ namespace FFPP.Common
             {
                 FfppLogsDbThreadSafeCoordinator.ThreadSafeAdd(new FfppLogsDbContext.LogEntry()
                 {
-                    Message = $"Exception purging FFPP API Cache: {ex.Message}, Inner Exception: {ex.InnerException.Message ?? string.Empty}",
+                    Message = $"Exception purging FFPP API Cache: {ex.Message}",
                     Username = "FFPP",
                     Severity = "Error",
                     API = "RemoveFfppCache"

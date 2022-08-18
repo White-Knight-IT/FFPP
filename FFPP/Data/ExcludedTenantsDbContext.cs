@@ -86,7 +86,7 @@ namespace FFPP.Data
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Exception writing  in ExcludedTenant: {0}, Inner Exception: {1}", ex.Message, ex.InnerException.Message ?? string.Empty);
+                Console.WriteLine($"Exception writing  in ExcludedTenant: {ex.Message}");
                 throw ex;
             }
         }

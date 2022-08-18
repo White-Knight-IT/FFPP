@@ -789,7 +789,7 @@ namespace FFPP.Common
                 }
 				catch (Exception ex)
 				{
-					Console.WriteLine(string.Format("Exception in NewExoRequest: {0}, Inner Exception: {1}", ex.Message, ex.InnerException.Message ?? string.Empty));
+					Console.WriteLine($"Exception in NewExoRequest: {ex.Message}");
 					throw;
 				}
 			}

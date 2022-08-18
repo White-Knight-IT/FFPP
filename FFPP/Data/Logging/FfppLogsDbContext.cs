@@ -117,7 +117,7 @@ namespace FFPP.Data.Logging
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Exception writing log entry in FfppLogs: {0}, Inner Exception: {1}", ex.Message, ex.InnerException.Message ?? string.Empty);
+                Console.WriteLine($"Exception writing log entry in FfppLogs: {ex.Message}");
             }
 
             return false;
