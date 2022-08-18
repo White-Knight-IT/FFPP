@@ -250,7 +250,7 @@ namespace FFPP.Common
             }
             catch
             {
-                Console.WriteLine("Didn't create DB tables, this is expected if they already exist");
+                Console.WriteLine($"Didn't create DB tables, this is expected if they already exist - server: {ApiEnvironment.MysqlServer} - port: {ApiEnvironment.MysqlServerPort}");
             }
 
             return false;
