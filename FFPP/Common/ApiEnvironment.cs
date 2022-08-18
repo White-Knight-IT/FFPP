@@ -69,6 +69,7 @@ namespace FFPP.Common
         public static bool ShowDevEnvEndpoints = false;
         public static bool ShowSwaggerUi = false;
         public static bool RunSwagger = false;
+        public static bool ServeStaticFiles= false;
         public static bool UseHttpsRedirect = true;
         public static byte[]? EntropyBytes;
         public static string PlainTextFilePath = PersistentDir + "/plain.secrets.json";
@@ -228,20 +229,27 @@ namespace FFPP.Common
         /// </summary>
         public static async void UpdateDbContexts()
         {
-            using (FfppLogsDbContext logsDb = new())
+            try
             {
-                await logsDb.Database.MigrateAsync();
-            }
+                using (FfppLogsDbContext logsDb = new())
+                {
+                    await logsDb.Database.MigrateAsync();
+                }
 
-            using (ExcludedTenantsDbContext exTenantsDb = new())
-            {
-                await exTenantsDb.Database.MigrateAsync();
-            }
+                using (ExcludedTenantsDbContext exTenantsDb = new())
+                {
+                    await exTenantsDb.Database.MigrateAsync();
+                }
 
-            using (UserProfilesDbContext userProfilesDb = new())
+                using (UserProfilesDbContext userProfilesDb = new())
+                {
+                    await userProfilesDb.Database.MigrateAsync();
+                }
+            }
+            catch
             {
-                await userProfilesDb.Database.MigrateAsync();
-            }     
+                Console.WriteLine("Didn't create DB tables, this is expected if they already exist");
+            }
         }
 
         public static async Task<byte[]> GetEntropyBytes()

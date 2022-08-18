@@ -12,7 +12,7 @@ This port is designed/targeted for small Linux devices/servers, however being do
 
 ## Licensing
 
-Licensed under the [A-GPL v3.0 License](https://choosealicense.com/licenses/agpl-3.0/) you get no warranty and it's a case of use at your own risk. The license and contained copyright notice would need to be included with any copies of this repository/software as per A-GPL v3.0 licensing requirements. There is also a license (See SECURITY_LICENSE) describing that there is no liability on the owner/contributors of this repository for security vulnerabilities that may arise.
+Licensed under the [AGPL-3.0 License](https://choosealicense.com/licenses/agpl-3.0/) you get no warranty and it's a case of use at your own risk. The license and contained copyright notice would need to be included with any copies of this repository/software as per A-GPL v3.0 licensing requirements. There is also a license (See SECURITY_LICENSE) describing that there is no liability on the owner/contributors of this repository for security vulnerabilities that may arise.
 
 ## Prerequisites for development environment (devenv)
 

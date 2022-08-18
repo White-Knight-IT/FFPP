@@ -29,7 +29,7 @@ Created by Ian Harris (@knightian) - White Knight IT - https://whiteknightit.com
 
 2022-07-05
 
-Licensed under the MIT License
+Licensed under the AGPL-3.0 License + Security License Addendum
 
 v" + ApiEnvironment.ApiBinaryVersion+@"
 ");
@@ -41,6 +41,7 @@ ApiEnvironment.UseHttpsRedirect = builder.Configuration.GetValue<bool>("ApiSetti
 ApiEnvironment.ShowDevEnvEndpoints = builder.Configuration.GetValue<bool>("ApiSettings:ShowDevEndpoints");
 ApiEnvironment.ShowSwaggerUi = builder.Configuration.GetValue<bool>("ApiSettings:ShowSwaggerUi");
 ApiEnvironment.RunSwagger = builder.Configuration.GetValue<bool>("ApiSettings:RunSwagger");
+ApiEnvironment.ServeStaticFiles = builder.Configuration.GetValue<bool>("ApiSettings:ServeStaticFiles");
 ApiEnvironment.MysqlUser = builder.Configuration.GetValue<string>("ApiSettings:DbSettings:MysqlUser") ?? "ffppapiservice";
 ApiEnvironment.MysqlPassword = builder.Configuration.GetValue<string>("ApiSettings:DbSettings:MysqlPassword") ?? "wellknownpassword";
 ApiEnvironment.MysqlServer = builder.Configuration.GetValue<string>("ApiSettings:DbSettings:MysqlServer") ?? "localhost";
@@ -52,6 +53,8 @@ ApiEnvironment.PersistentDir = builder.Configuration.GetValue<string>("ApiSettin
 ApiEnvironment.DataAndCacheDirectoriesBuild();
 
 await ApiEnvironment.GetEntropyBytes();
+
+ApiEnvironment.UpdateDbContexts();
 
 // Expose development environment API endpoints if set in settings to do so
 if (ApiEnvironment.ShowDevEnvEndpoints)
@@ -92,13 +95,6 @@ else
     builder.Services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration, "ZeroConf:AzureAd");
 }
 
-// We have yet to complete the Zero Configuration setup
-if (!ApiZeroConfiguration.ZeroConfExists())
-{
-    ApiEnvironment.UpdateDbContexts();
-    await ApiZeroConfiguration.Setup(ApiEnvironment.Secrets.TenantId);
-}
-
 // No secrets from dev so let's try our prod secrets
 if (string.IsNullOrEmpty(ApiEnvironment.Secrets.TenantId) || string.IsNullOrWhiteSpace(ApiEnvironment.Secrets.TenantId))
 {
@@ -109,9 +105,13 @@ if (string.IsNullOrEmpty(ApiEnvironment.Secrets.TenantId) || string.IsNullOrWhit
         Thread.CurrentThread.Join(500);
     }
 }
-else
+
+ApiEnvironment.HasCredentials = true;
+
+// We have yet to complete the Zero Configuration setup
+if (!ApiZeroConfiguration.ZeroConfExists())
 {
-    ApiEnvironment.HasCredentials = true;
+    await ApiZeroConfiguration.Setup(ApiEnvironment.Secrets.TenantId);
 }
 
 builder.WebHost.UseUrls();
@@ -219,8 +219,11 @@ if (ApiEnvironment.UseHttpsRedirect)
     app.UseHttpsRedirection();
 }
 
-// Allows us to serve files from wwwroot to customise swagger etc.
-app.UseStaticFiles();
+if (ApiEnvironment.ServeStaticFiles)
+{
+    // Allows us to serve files from wwwroot to customise swagger etc.
+    app.UseStaticFiles();
+}
 
 ApiVersionSetBuilder apiVersionSetBuilder = app.NewApiVersionSet();
 
