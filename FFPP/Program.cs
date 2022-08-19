@@ -11,10 +11,12 @@ using FFPP.Api.v10.Dashboards;
 using ApiCurrent = FFPP.Api;
 using ApiV10 = FFPP.Api.v10;
 using ApiDev = FFPP.Api.v11;
+using ApiBootstrap = FFPP.Api.Bootstrap;
 using Asp.Versioning.Builder;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
+using FFPP.Api.Bootstrap;
 
 Console.WriteLine(@"
     ________________  ____ 
@@ -35,6 +37,26 @@ v" + ApiEnvironment.ApiBinaryVersion+@"
 ");
 
 var builder = WebApplication.CreateBuilder(args);
+var builderBootstrap = WebApplication.CreateBuilder(args);
+
+// CORS policy to allow the UI to access the API
+string corsUri = builder.Configuration["ApiSettings:WebUiUrl"] ?? "https://localhost:7074";
+builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
+{
+    // This allows for our Web UI which may be at a totally different domain and/or port to comminucate with the API
+    builder.WithOrigins(corsUri).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+}));
+
+builderBootstrap.Services.AddCors(p => p.AddPolicy("corsapp", builderBootstrap =>
+{
+    // This allows for our Web UI which may be at a totally different domain and/or port to comminucate with the API
+    builderBootstrap.WithOrigins(corsUri).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+}));
+
+builderBootstrap.WebHost.UseUrls();
+var appBootstrap = builderBootstrap.Build();
+ApiBootstrap.BootstrapRoutes.InitRoutes(ref appBootstrap);
+appBootstrap.RunAsync();
 
 // Load individual settings
 ApiEnvironment.UseHttpsRedirect = builder.Configuration.GetValue<bool>("ApiSettings:HttpsRedirect");
@@ -83,37 +105,26 @@ if (ApiEnvironment.IsDebug)
             Console.WriteLine("########### Didn't detect dev credentials in usersecrets but this is ok if we are using prod secrets ############");
         }
     }
-
-    // In debug we subscribe to verbose JWT events
-    builder.Services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration, "ZeroConf:AzureAd", subscribeToJwtBearerMiddlewareDiagnosticsEvents: true);
-
-}
-else
-{
-    builder.Services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration, "ZeroConf:AzureAd");
 }
 
+builder.Services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration, "ZeroConf:AzureAd");
+builder.WebHost.UseUrls();
 // If this is initial run or there are new DB migrations they will be executed
 await ApiEnvironment.UpdateDbContexts();
 
-Task credentials = new(() =>
+
+// No secrets from dev so let's try our prod secrets
+while (string.IsNullOrEmpty(ApiEnvironment.Secrets.TenantId) || string.IsNullOrWhiteSpace(ApiEnvironment.Secrets.TenantId))
 {
-    // No secrets from dev so let's try our prod secrets
-    if (string.IsNullOrEmpty(ApiEnvironment.Secrets.TenantId) || string.IsNullOrWhiteSpace(ApiEnvironment.Secrets.TenantId))
+    // We will wait until we get a production secret source
+    while (!ApiEnvironment.GetProductionSecrets(ApiEnvironment.ProductionSecretStores.EncryptedFile).Result)
     {
-        // We will wait until we get a production secret source
-        while (!ApiEnvironment.GetProductionSecrets(ApiEnvironment.ProductionSecretStores.EncryptedFile).Result)
-        {
-            Console.WriteLine("######################## Please provide a secrets file");
-            Thread.CurrentThread.Join(500);
-        }
+        Console.WriteLine("######################## Please provide a secrets file");
+        Thread.CurrentThread.Join(1000);
     }
+}
 
-    ApiEnvironment.HasCredentials = true;
-});
-
-// background thread that continually checks for credentials
-credentials.Start();
+ApiEnvironment.HasCredentials = true;
 
 
 // We have yet to complete the Zero Configuration setup
@@ -124,8 +135,6 @@ if (!ApiZeroConfiguration.ZeroConfExists())
         await ApiZeroConfiguration.Setup(ApiEnvironment.Secrets.TenantId);
     }
 }
-
-builder.WebHost.UseUrls();
 
 // Read ZeroConf and load it into app config
 ApiZeroConfiguration zeroConf = await Utilities.ReadJsonFromFile<ApiZeroConfiguration>(ApiEnvironment.ZeroConfPath,true);
@@ -143,7 +152,7 @@ builder.Configuration["ZeroConf:AzureAd:CallbackPath"] = zeroConf.CallbackPath;
 // Add auth services
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
-string corsUri = builder.Configuration["ApiSettings:WebUiUrl"] ?? "https://localhost:7074";
+
 builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
 {
     // This allows for our Web UI which may be at a totally different domain and/or port to comminucate with the API

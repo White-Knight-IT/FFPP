@@ -11,8 +11,6 @@ namespace FFPP.Api
     {
         public static void InitRoutes(ref WebApplication app)
         {
-            #region API Routes
-
             /// <summary>
             /// /.auth/me
             /// </summary>
@@ -291,7 +289,6 @@ namespace FFPP.Api
                     return Results.Unauthorized();
                 }
             }).WithName(string.Format("/{0}/ListUserSigninLogs", ApiEnvironment.ApiHeader)).ExcludeFromDescription();
-            #endregion
         }
     }
 }

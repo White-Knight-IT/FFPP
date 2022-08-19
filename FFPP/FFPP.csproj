@@ -41,10 +41,10 @@
     <Folder Include="wwwroot\Swagger-Customisation\" />
     <Folder Include="Common\" />
     <Folder Include="Versions\api\" />
-    <Folder Include="Versions\api\v1.0\" />
     <Folder Include="Versions\api\v1.1\" />
     <Folder Include="Data\Cache\Pre-Fetch\" />
     <Folder Include="Data\Cache\Pre-Fetch\Users\" />
+    <Folder Include="Versions\api\Bootstrap\" />
   </ItemGroup>
   <ItemGroup>
     <None Remove="System.IdentityModel.Tokens.Jwt" />
@@ -61,7 +61,6 @@
     <None Remove="Common\" />
     <None Remove="Asp.Versioning.Mvc.ApiExplorer" />
     <None Remove="Versions\api\" />
-    <None Remove="Versions\api\v1.0\" />
     <None Remove="Versions\api\v1.1\" />
     <None Remove="Data\Cache\Pre-Fetch\" />
     <None Remove="Data\Cache\Pre-Fetch\Users\" />
@@ -75,6 +74,7 @@
     <None Remove="Microsoft.EntityFrameworkCore.Design" />
     <None Remove="Pomelo.EntityFrameworkCore.MySql" />
     <None Remove="Microsoft.EntityFrameworkCore" />
+    <None Remove="Versions\api\Bootstrap\" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="wwwroot\" />
@@ -150,9 +150,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Update="wwwroot\img\ffpp-ico-proof.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\home\index.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Update="wwwroot\css\all.css">

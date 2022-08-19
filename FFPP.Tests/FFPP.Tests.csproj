@@ -22,6 +22,7 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
     <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="6.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="6.0.8" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,6 +30,7 @@
     <None Remove="Versions\" />
     <None Remove="Versions\v1.0\" />
     <None Remove="Pomelo.EntityFrameworkCore.MySql" />
+    <None Remove="Microsoft.EntityFrameworkCore.Relational" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="AssertionData\" />
