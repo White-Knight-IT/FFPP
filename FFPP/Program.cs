@@ -96,18 +96,25 @@ else
 // If this is initial run or there are new DB migrations they will be executed
 await ApiEnvironment.UpdateDbContexts();
 
-// No secrets from dev so let's try our prod secrets
-if (string.IsNullOrEmpty(ApiEnvironment.Secrets.TenantId) || string.IsNullOrWhiteSpace(ApiEnvironment.Secrets.TenantId))
+Task credentials = new(() =>
 {
-    // We will wait until we get a production secret source
-    while(!await ApiEnvironment.GetProductionSecrets(ApiEnvironment.ProductionSecretStores.EncryptedFile))
+    // No secrets from dev so let's try our prod secrets
+    if (string.IsNullOrEmpty(ApiEnvironment.Secrets.TenantId) || string.IsNullOrWhiteSpace(ApiEnvironment.Secrets.TenantId))
     {
-        Console.WriteLine("######################## Please provide a secrets file");
-        Thread.CurrentThread.Join(500);
+        // We will wait until we get a production secret source
+        while (!ApiEnvironment.GetProductionSecrets(ApiEnvironment.ProductionSecretStores.EncryptedFile).Result)
+        {
+            Console.WriteLine("######################## Please provide a secrets file");
+            Thread.CurrentThread.Join(500);
+        }
     }
-}
 
-ApiEnvironment.HasCredentials = true;
+    ApiEnvironment.HasCredentials = true;
+});
+
+// background thread that continually checks for credentials
+credentials.Start();
+
 
 // We have yet to complete the Zero Configuration setup
 if (!ApiZeroConfiguration.ZeroConfExists())
