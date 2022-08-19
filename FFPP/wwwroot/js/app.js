@@ -16,6 +16,12 @@ async function Refresh()
 	]);
 
   document.getElementById('tenantsDropdownButton').disabled=false;
+
+  const isSetupResponse = await IsSetup();
+  if(!isSetupResponse.isSetup)
+  {
+    location.href="/setup/initial";
+  }
 }
 
 async function TenantRefresh()

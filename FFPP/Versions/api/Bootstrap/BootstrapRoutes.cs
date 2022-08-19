@@ -15,9 +15,9 @@ namespace FFPP.Api.Bootstrap
             /// </summary>
             app.MapGet("/api/bootstrap/IsSetup", async (HttpContext context, HttpRequest request) =>
             {
-                Task<bool> checkCreds = new(() =>
+                Task<IsSetupResponse> checkCreds = new(() =>
                 {
-                    return ApiEnvironment.HasCredentials;
+                    return new IsSetupResponse(){ isSetup = ApiEnvironment.HasCredentials };
                 });
 
                 checkCreds.Start();
@@ -39,6 +39,11 @@ namespace FFPP.Api.Bootstrap
                 return await checkCreds;
 
             }).WithName("/api/bootstrap/GetAADPSCode").ExcludeFromDescription();
+        }
+
+        public struct IsSetupResponse
+        {
+           public bool isSetup { get; set; }
         }
     }
 }
