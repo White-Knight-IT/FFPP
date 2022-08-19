@@ -28,7 +28,7 @@ namespace FFPP.Common
             return File.Exists(ApiEnvironment.ZeroConfPath);
         }
 
-        public static async Task<bool> Setup(string ownerTenant)
+        public static async Task<bool> Setup(string ownerTenant="")
         {
             // TenantId is GUID (CustomerId) and not domain
             if (!ownerTenant.Contains('.'))

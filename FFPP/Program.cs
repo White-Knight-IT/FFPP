@@ -119,7 +119,10 @@ credentials.Start();
 // We have yet to complete the Zero Configuration setup
 if (!ApiZeroConfiguration.ZeroConfExists())
 {
-    await ApiZeroConfiguration.Setup(ApiEnvironment.Secrets.TenantId);
+    if (ApiEnvironment.HasCredentials)
+    {
+        await ApiZeroConfiguration.Setup(ApiEnvironment.Secrets.TenantId);
+    }
 }
 
 builder.WebHost.UseUrls();
