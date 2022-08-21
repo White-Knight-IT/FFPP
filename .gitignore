@@ -375,7 +375,10 @@ device.id.token
 # Potential secrets
 */plain.secrets.json
 plain.secrets.json #pre-ingestion to encrypted state
+*/encrypted.secrets.json
 encrypted.secrets.json
+bootstrap.json
+*/bootstrap.json
 
 # macOS
 .DS_Store
