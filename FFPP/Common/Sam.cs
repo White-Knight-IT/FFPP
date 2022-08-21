@@ -801,10 +801,9 @@ namespace FFPP.Common
                         }
 					};
 
-
 					JsonElement createdSamApp = await RequestHelper.NewGraphPostRequest("https://graph.microsoft.com/v1.0/applications", ApiEnvironment.Secrets.TenantId, samApp, HttpMethod.Post, "https://graph.microsoft.com/.default", true);
-					await Task.Delay(30000); // Have to wait about 30 seconds for Azure to properly replicate the app before we can set password on it
-					Console.WriteLine("Waiting 30 seconds for app to progagate through Azure before setting a password on it...");
+                    Console.WriteLine("Waiting 30 seconds for app to progagate through Azure before setting a password on it...");
+                    await Task.Delay(30000); // Have to wait about 30 seconds for Azure to properly replicate the app before we can set password on it
 					var appPasswordJson = await RequestHelper.NewGraphPostRequest(string.Format("https://graph.microsoft.com/v1.0/applications/{0}/addPassword", createdSamApp.GetProperty("id").GetString()), ApiEnvironment.Secrets.TenantId, new PasswordCredential() { displayName="FFPP-Pwd" }, HttpMethod.Post, "https://graph.microsoft.com/.default", true);
 					return new() { sam=createdSamApp, appPassword=appPasswordJson.GetProperty("secretText").GetString() ?? string.Empty };
 

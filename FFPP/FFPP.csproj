@@ -8,6 +8,7 @@
     <UserSecretsId>590632f0-485c-441c-a9c5-d1e940f9dfa5</UserSecretsId>
     <ReleaseVersion>THIS_VERSION_IS_NOT_USED</ReleaseVersion>
     <AssemblyName>ffpp</AssemblyName>
+    <RollForward>Minor</RollForward>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -15,7 +16,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>embedded</DebugType>
-    <WarningLevel>4</WarningLevel>
+    <WarningLevel>1</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
@@ -46,7 +47,6 @@
     <Folder Include="Migrations\" />
     <Folder Include="Data\Logging\" />
     <Folder Include="wwwroot\" />
-    <Folder Include="wwwroot\Swagger-Customisation\" />
     <Folder Include="Common\" />
     <Folder Include="Versions\api\" />
     <Folder Include="Versions\api\v1.1\" />
@@ -87,8 +87,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Remove="wwwroot\" />
-    <Content Remove="wwwroot\Swagger-Customisation\Swagger-Customisation.css" />
-    <Content Remove="wwwroot\Swagger-Customisation\" />
     <Content Remove="Data\Cache\tenants.cache.json" />
     <Content Remove="Data\plain.secrets.json" />
     <Content Remove="Data\api.zeroconf.json" />
@@ -101,9 +99,6 @@
     <Content Remove="api.zeroconf.json" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="wwwroot\Swagger-Customisation\Swagger-Customisation.css">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="..\.editorconfig" />
   </ItemGroup>
   <ItemGroup>
@@ -230,6 +225,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Update="wwwroot\css\ffpp.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\swagger-customisation\swagger-customisation.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="wwwroot\setup\initial\index.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

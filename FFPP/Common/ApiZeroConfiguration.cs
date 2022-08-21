@@ -81,7 +81,7 @@ namespace FFPP.Common
                     Utilities.WriteJsonToFile<ApiZeroConfiguration>(zeroConf, ApiEnvironment.ZeroConfPath,true);
 
                     // Setup our front end config file
-                    await File.WriteAllTextAsync(ApiEnvironment.WwwRootDir+"/config.js",$@"/* Don't put secret configuration settings in this file, this is rendered
+                    await File.WriteAllTextAsync(ApiEnvironment.WebRootPath + "/config.js",$@"/* Don't put secret configuration settings in this file, this is rendered
 by the client. */
 
 const config = {{

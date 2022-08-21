@@ -40,13 +40,13 @@ namespace FFPP.Common
         public static readonly string PreFetchDir = CacheDir + "/Pre-Fetch";
         public static readonly string UsersPreFetchDir = PreFetchDir + "/Users";
         public static readonly string CachedTenantsFile = CacheDir + "/tenants.cache.json";
-        public static readonly string WwwRootDir = WorkingDir + "/wwwroot";
         public static readonly string LicenseConversionTableFile = DataDir + "/ConversionTable.csv";
         public static readonly string LicenseConversionTableMisfitsFile = DataDir + "/ConversionTableMisfits.csv";
         public static readonly string ZeroConfPath = PersistentDir + "/api.zeroconf.json";
         public static readonly string ApiVersionFile = WorkingDir + "/version_latest.txt";
         public static readonly string DeviceTokenPath = PersistentDir + "/device.id.token";
         public static readonly string UniqueEntropyBytesPath = PersistentDir + "/unique.entropy.bytes";
+        public static string WebRootPath = WorkingDir + "/wwwroot";
         public static readonly string ApiBinaryVersion = File.ReadAllText(ApiVersionFile);
         public static readonly string ApiHeader = "api";
         public static readonly string ApiAccessScope = "ffpp-api.access";

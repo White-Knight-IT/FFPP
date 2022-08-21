@@ -51,6 +51,7 @@ ApiEnvironment.MysqlServer = builder.Configuration.GetValue<string>("ApiSettings
 ApiEnvironment.MysqlServerPort = builder.Configuration.GetValue<string>("ApiSettings:DbSettings:MysqlServerPort") ?? "7704";
 ApiEnvironment.CacheDir = builder.Configuration.GetValue<string>("ApiSettings:CachePath") ?? ApiEnvironment.DataDir;
 ApiEnvironment.PersistentDir = builder.Configuration.GetValue<string>("ApiSettings:PersistentPath") ?? ApiEnvironment.WorkingDir;
+ApiEnvironment.WebRootPath = builder.Configuration.GetValue<string>("ApiSettings:WebRootPath") ?? ApiEnvironment.WorkingDir + "/wwwroot";
 ApiEnvironment.FfppFrontEndUri = builder.Configuration.GetValue<string>("ApiSettings:WebUiUrl") ?? "http://localhost";
 ApiEnvironment.DeviceTag = await ApiEnvironment.GetDeviceTag();
 string kestrelHttps = builder.Configuration.GetValue<string>("Kestrel:Endpoints:Https:Url") ?? "https://localhost:7074";
@@ -240,6 +241,7 @@ foreach (double version in ApiEnvironment.ApiRouteVersions)
 
 ApiEnvironment.ApiVersionSet = apiVersionSetBuilder.ReportApiVersions().Build();
 
+// /bootstrap special API endpoints for bootstrapping this API, not used by anything other than FFPP realistically
 ApiBootstrap.BootstrapRoutes.InitRoutes(ref app);
 
 // /x.x (ApiEnvironment.ApiDev) path which uses the latest devenv API specification (will only be accessible if ShowDevEnvEndpoints = true)
