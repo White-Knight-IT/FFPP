@@ -276,7 +276,7 @@ if (ApiEnvironment.RunSwagger)
                 customSwagger.SwaggerEndpoint(url, $"FFPP API {name}");
             }
 
-            customSwagger.InjectStylesheet("/Swagger-Customisation/Swagger-Customisation.css");
+            customSwagger.InjectStylesheet("/swagger-customisation/swagger-customisation.css");
             customSwagger.OAuthClientId(app.Configuration["ZeroConf:AzureAd:OpenIdClientId"]);
             customSwagger.OAuthUsePkce();
             customSwagger.OAuthScopeSeparator(" ");
