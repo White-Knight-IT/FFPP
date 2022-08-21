@@ -212,6 +212,7 @@ namespace FFPP.Common
 							}
 							else
 							{
+                                nextUrl = string.Empty;
                                 FfppLogsDbThreadSafeCoordinator.ThreadSafeAdd(new FfppLogsDbContext.LogEntry()
                                 {
                                     Message = $"Incorrect HTTP status code. Expected 2XX got {responseMessage.StatusCode.ToString()}. Uri: {uri}",
@@ -220,14 +221,16 @@ namespace FFPP.Common
                                     Tenant = tenantId,
                                     API = "NewGraphGetRequest"
                                 });
+								throw new BadHttpRequestException("We did not get a http ok response from the upstream (graph)");
                             }
 
 						}
 					}
-					catch (Exception exception)
+					catch (Exception ex)
 					{
-						Console.WriteLine($"Exception in NewGraphGetRequest: {exception.Message}, Inner Exception: {exception.InnerException.Message ?? string.Empty}");
-						throw;
+						Console.WriteLine($"Exception in NewGraphGetRequest: {ex.Message}");
+						nextUrl = string.Empty;
+                        throw;
 					}
 				}
 				while (!string.IsNullOrEmpty(nextUrl));
@@ -317,9 +320,9 @@ namespace FFPP.Common
                         }
 					}
 				}
-				catch (Exception exception)
+				catch (Exception ex)
 				{
-					Console.WriteLine(string.Format("Exception in NewGraphGetRequest: {0}, Inner Exception: {1}", exception.Message, exception.InnerException.Message ?? string.Empty));
+					Console.WriteLine($"Exception in NewGraphGetRequest: {ex.Message}");
 					throw;
 				}
 			}
@@ -407,9 +410,9 @@ namespace FFPP.Common
                         }
 					}
 				}
-				catch (Exception exception)
+				catch (Exception ex)
 				{
-					Console.WriteLine(string.Format("Exception in NewGraphGetRequest: {0}, Inner Exception: {1}", exception.Message, exception.InnerException.Message));
+					Console.WriteLine($"Exception in NewGraphGetRequest: {ex.Message}");
 					throw;
 				}
 			}
@@ -485,7 +488,7 @@ namespace FFPP.Common
 				}
 				catch (Exception ex)
 				{
-					Console.WriteLine(string.Format("Exception in NewGraphPostRequest: {0}, Inner Exception: {1}", ex.Message, ex.InnerException.Message));
+					Console.WriteLine($"Exception in NewGraphPostRequest: {ex.Message}");
 					throw;
 				}
 
@@ -634,8 +637,7 @@ namespace FFPP.Common
 					}
 					catch (Exception ex)
 					{
-						Console.WriteLine(string.Format("Exception in NewClassicAPIGetRequest: {0}, Inner Exception: {1}",
-							ex.Message, ex.InnerException.Message ?? string.Empty));
+						Console.WriteLine($"Exception in NewClassicAPIGetRequest: {ex.Message}");
 						throw;
 					}
 				}
@@ -723,7 +725,7 @@ namespace FFPP.Common
 				}
 				catch (Exception ex)
 				{
-					Console.WriteLine(string.Format("Exception in NewClassicApiPostRequest: {0}, Inner Exception: {1}", ex.Message, ex.InnerException.Message));
+					Console.WriteLine($"Exception in NewClassicApiPostRequest: {ex.Message}");
 					throw;
 				}
 			}

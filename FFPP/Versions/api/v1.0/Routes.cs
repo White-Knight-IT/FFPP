@@ -17,7 +17,6 @@ namespace FFPP.Api.v10
 
         public static void InitRoutes(ref WebApplication app)
         {
-            #region API Routes
             /// <summary>
             /// /v1.0/.auth/me
             /// </summary>
@@ -32,15 +31,28 @@ namespace FFPP.Api.v10
                     context.Response.StatusCode = 401;
                     return Results.Unauthorized();
                 }
+                catch
+                {
+                    context.Response.StatusCode = 500;
+                    return Results.Problem();
+                }
 
             }).WithName(string.Format("/{0}/.auth/me", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
 
             /// <summary>
             /// /v1.0/CurrentRouteVersion
             /// </summary>
-            app.MapGet("/v{version:apiVersion}/CurrentRouteVersion", async () =>
+            app.MapGet("/v{version:apiVersion}/CurrentRouteVersion", async (HttpContext context) =>
             {
-                return await CurrentRouteVersion();
+                try
+                {
+                    return await CurrentRouteVersion();
+                }
+                catch
+                {
+                    context.Response.StatusCode = 500;
+                    return Results.Problem();
+                }
 
             }).WithName(string.Format("/{0}/CurrentRouteVersion", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
 
@@ -59,6 +71,11 @@ namespace FFPP.Api.v10
                     context.Response.StatusCode = 401;
                     return Results.Unauthorized();
                 }
+                catch
+                {
+                    context.Response.StatusCode = 500;
+                    return Results.Problem();
+                }
 
             }).WithName(string.Format("/{0}/EditUserProfile", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
 
@@ -76,8 +93,12 @@ namespace FFPP.Api.v10
                     context.Response.StatusCode = 401;
                     return Results.Unauthorized();
                 }
-            })
-            .WithName(string.Format("/{0}/GetDashboard", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
+                catch
+                {
+                    context.Response.StatusCode = 500;
+                    return Results.Problem();
+                }
+            }).WithName(string.Format("/{0}/GetDashboard", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
 
             /// <summary>
             /// /v1.0/GetVersion
@@ -93,24 +114,35 @@ namespace FFPP.Api.v10
                     context.Response.StatusCode = 401;
                     return Results.Unauthorized();
                 }
-            })
-            .WithName(string.Format("/{0}/GetVersion", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
+                catch
+                {
+                    context.Response.StatusCode = 500;
+                    return Results.Problem();
+                }
+            }).WithName(string.Format("/{0}/GetVersion", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
 
             /// <summary>
             /// /v1.0/Heartbeat
             /// </summary>
-            app.MapGet("/v{version:apiVersion}/Heartbeat", async () =>
+            app.MapGet("/v{version:apiVersion}/Heartbeat", async (HttpContext context) =>
             {
-                Task<Heartbeat> task = new(() =>
+                try
                 {
-                    return new Heartbeat();
-                });
+                    Task<object> task = new(() =>
+                    {
+                        return new Heartbeat();
+                    });
 
-                task.Start();
+                    task.Start();
 
-                return await task;
-            })
-            .WithName(string.Format("/{0}/Heartbeat", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
+                    return await task;
+                }
+                catch
+                {
+                    context.Response.StatusCode = 500;
+                    return Results.Problem();
+                }
+            }).WithName(string.Format("/{0}/Heartbeat", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
 
             /// <summary>
             /// /v1.0/ListDomains
@@ -126,8 +158,12 @@ namespace FFPP.Api.v10
                     context.Response.StatusCode = 401;
                     return Results.Unauthorized();
                 }
-            })
-            .WithName(string.Format("/{0}/ListDomains", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
+                catch
+                {
+                    context.Response.StatusCode = 500;
+                    return Results.Problem();
+                }
+            }).WithName(string.Format("/{0}/ListDomains", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
 
             /// <summary>
             /// /v1.0/ListSites
@@ -143,9 +179,13 @@ namespace FFPP.Api.v10
                     context.Response.StatusCode = 401;
                     return Results.Unauthorized();
                 }
+                catch
+                {
+                    context.Response.StatusCode = 500;
+                    return Results.Problem();
+                }
 
-            })
-            .WithName(string.Format("/{0}/ListSites", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
+            }).WithName(string.Format("/{0}/ListSites", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
 
             /// <summary>
             /// /v1.0/ListTenants
@@ -161,9 +201,13 @@ namespace FFPP.Api.v10
                     context.Response.StatusCode = 401;
                     return Results.Unauthorized();
                 }
+                catch
+                {
+                    context.Response.StatusCode = 500;
+                    return Results.Problem();
+                }
 
-            })
-            .WithName(string.Format("/{0}/ListTenants", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
+            }).WithName(string.Format("/{0}/ListTenants", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
 
             /// <summary>
             /// /v1.0/ListUsers
@@ -179,8 +223,12 @@ namespace FFPP.Api.v10
                     context.Response.StatusCode = 401;
                     return Results.Unauthorized();
                 }
-            })
-            .WithName(string.Format("/{0}/ListUsers", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
+                catch
+                {
+                    context.Response.StatusCode = 500;
+                    return Results.Problem();
+                }
+            }).WithName(string.Format("/{0}/ListUsers", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
 
             /// <summary>
             /// /v1.0/ListUserConditionalAccessPolicies
@@ -196,8 +244,12 @@ namespace FFPP.Api.v10
                     context.Response.StatusCode = 401;
                     return Results.Unauthorized();
                 }
-            })
-            .WithName(string.Format("/{0}/ListUserConditionalAccessPolicies", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
+                catch
+                {
+                    context.Response.StatusCode = 500;
+                    return Results.Problem();
+                }
+            }).WithName(string.Format("/{0}/ListUserConditionalAccessPolicies", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
 
             /// <summary>
             /// /v1.0/ListUserDevices
@@ -213,8 +265,12 @@ namespace FFPP.Api.v10
                     context.Response.StatusCode = 401;
                     return Results.Unauthorized();
                 }
-            })
-            .WithName(string.Format("/{0}/ListUserDevices", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
+                catch
+                {
+                    context.Response.StatusCode = 500;
+                    return Results.Problem();
+                }
+            }).WithName(string.Format("/{0}/ListUserDevices", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
 
             /// <summary>
             /// /v1.0/ListUserGroups
@@ -229,6 +285,11 @@ namespace FFPP.Api.v10
                 {
                     context.Response.StatusCode = 401;
                     return Results.Unauthorized();
+                }
+                catch
+                {
+                    context.Response.StatusCode = 500;
+                    return Results.Problem();
                 }
             }).WithName(string.Format("/{0}/ListUserGroups", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
 
@@ -246,8 +307,12 @@ namespace FFPP.Api.v10
                     context.Response.StatusCode = 401;
                     return Results.Unauthorized();
                 }
-            })
-            .WithName(string.Format("/{0}/ListUserMailboxDetails", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
+                catch
+                {
+                    context.Response.StatusCode = 500;
+                    return Results.Problem();
+                }
+            }).WithName(string.Format("/{0}/ListUserMailboxDetails", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
 
             /// <summary>
             /// /v1.0/ListUserPhoto
@@ -263,8 +328,12 @@ namespace FFPP.Api.v10
                     context.Response.StatusCode = 401;
                     return Results.Unauthorized();
                 }
-            })
-            .WithName(string.Format("/{0}/ListUserPhoto", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
+                catch
+                {
+                    context.Response.StatusCode = 500;
+                    return Results.Problem();
+                }
+            }).WithName(string.Format("/{0}/ListUserPhoto", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
 
             /// <summary>
             /// /v1.0/ListUserSigninLogs
@@ -280,11 +349,15 @@ namespace FFPP.Api.v10
                     context.Response.StatusCode = 401;
                     return Results.Unauthorized();
                 }
+                catch
+                {
+                    context.Response.StatusCode = 500;
+                    return Results.Problem();
+                }
             }).WithName(string.Format("/{0}/ListUserSigninLogs", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV10);
-            #endregion
         }
 
-        public static async Task<CurrentApiRoute> CurrentRouteVersion()
+        public static async Task<object> CurrentRouteVersion()
         {
             Task<CurrentApiRoute> task = new(() =>
             {

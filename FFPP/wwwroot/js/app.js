@@ -17,11 +17,6 @@ async function Refresh()
 
   document.getElementById('tenantsDropdownButton').disabled=false;
 
-  const isSetupResponse = await IsSetup();
-  if(!isSetupResponse.isSetup)
-  {
-    location.href="/setup/initial";
-  }
 }
 
 async function TenantRefresh()
@@ -30,7 +25,7 @@ async function TenantRefresh()
   const tenantJson = await GetTenants(true);
   var dropItems="";
   for (var i = 0; i < tenantJson.length; i++){
-      dropItems+=`<li><a style='border-top: none' class="onclick-highlight panel-section-dark dropdown-item modal-bg-dark" data-tenant="${tenantJson[i].defaultDomainName}" data-customerid="${tenantJson[i].customerId}" onclick="SelectOption('tenantFilter',this.innerText,this.dataset.tenant, this.dataset.customerid, true)">${tenantJson[i].displayName}</a></li>`; 
+      dropItems+=`<li><a style='border-top: none' class="onclick-highlight panel-section-dark dropdown-item" data-tenant="${tenantJson[i].defaultDomainName}" data-customerid="${tenantJson[i].customerId}" onclick="SelectOption('tenantFilter',this.innerText,this.dataset.tenant, this.dataset.customerid, true)">${tenantJson[i].displayName}</a></li>`; 
   }
   document.getElementById('tenantData').innerHTML=dropItems;
 }

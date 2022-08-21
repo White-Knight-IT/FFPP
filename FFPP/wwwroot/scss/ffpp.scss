@@ -200,7 +200,7 @@ font-size: 12px;
 
 .onclick-highlight {
     &:active {
-        background-color: $ffpp-highlight-dark;
+        background-color: $ffpp-highlight-dark !important;
         color: $ffpp-bg-deep-dark;
         outline: none;
     }

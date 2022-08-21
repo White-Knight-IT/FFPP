@@ -37,26 +37,6 @@ v" + ApiEnvironment.ApiBinaryVersion+@"
 ");
 
 var builder = WebApplication.CreateBuilder(args);
-var builderBootstrap = WebApplication.CreateBuilder(args);
-
-// CORS policy to allow the UI to access the API
-string corsUri = builder.Configuration["ApiSettings:WebUiUrl"] ?? "https://localhost:7074";
-builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
-{
-    // This allows for our Web UI which may be at a totally different domain and/or port to comminucate with the API
-    builder.WithOrigins(corsUri).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
-}));
-
-builderBootstrap.Services.AddCors(p => p.AddPolicy("corsapp", builderBootstrap =>
-{
-    // This allows for our Web UI which may be at a totally different domain and/or port to comminucate with the API
-    builderBootstrap.WithOrigins(corsUri).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
-}));
-
-builderBootstrap.WebHost.UseUrls();
-var appBootstrap = builderBootstrap.Build();
-ApiBootstrap.BootstrapRoutes.InitRoutes(ref appBootstrap);
-appBootstrap.RunAsync();
 
 // Load individual settings
 ApiEnvironment.UseHttpsRedirect = builder.Configuration.GetValue<bool>("ApiSettings:HttpsRedirect");
@@ -70,6 +50,50 @@ ApiEnvironment.MysqlServer = builder.Configuration.GetValue<string>("ApiSettings
 ApiEnvironment.MysqlServerPort = builder.Configuration.GetValue<string>("ApiSettings:DbSettings:MysqlServerPort") ?? "7704";
 ApiEnvironment.CacheDir = builder.Configuration.GetValue<string>("ApiSettings:DbSettings:CachePath") ?? ApiEnvironment.DataDir;
 ApiEnvironment.PersistentDir = builder.Configuration.GetValue<string>("ApiSettings:DbSettings:PersistentPath") ?? ApiEnvironment.WorkingDir;
+
+string kestrelHttps = builder.Configuration.GetValue<string>("Kestrel:Endpoints:Https:Url") ?? "https://localhost:7074";
+string kestrelHttp = builder.Configuration.GetValue<string>("Kestrel:Endpoints:Http:Url") ?? "https://localhost:7073";
+
+// CORS policy to allow the UI to access the API
+string[] corsUris = new string[]{ builder.Configuration["ApiSettings:WebUiUrl"], kestrelHttps, kestrelHttp } ?? new string[]{kestrelHttps,kestrelHttp};
+
+builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
+{
+    // This allows for our Web UI which may be at a totally different domain and/or port to comminucate with the API
+    builder.WithOrigins(corsUris).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+}));
+
+// Add auth services
+builder.Services.AddAuthentication();
+builder.Services.AddAuthorization();
+
+// Add API versioning capabilities
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddApiVersioning(options =>
+{
+    options.AssumeDefaultVersionWhenUnspecified = true;
+    options.ReportApiVersions = true;
+    options.DefaultApiVersion = ApiEnvironment.ApiCurrent;
+}).AddApiExplorer(options =>
+{
+    options.SubstitutionFormat = "VV";
+    options.GroupNameFormat = "'v'VV";
+    options.SubstituteApiVersionInUrl = true;
+    options.AssumeDefaultVersionWhenUnspecified = true;
+});
+
+// Configure JSON options
+builder.Services.Configure<JsonOptions>(options =>
+{
+    options.SerializerOptions.AllowTrailingCommas = false;
+
+    // Official CIPP-API has absolutely no standards for serializing JSON, we need this to match it, and it hurts my soul immensly.
+    options.SerializerOptions.PropertyNamingPolicy = null;
+});
+
+builder.WebHost.UseUrls();
+
+await ApiEnvironment.UpdateDbContexts();
 
 // Build Data/Cache directories if they don't exist
 ApiEnvironment.DataAndCacheDirectoriesBuild();
@@ -102,18 +126,15 @@ if (ApiEnvironment.IsDebug)
         }
         catch
         {
-            Console.WriteLine("########### Didn't detect dev credentials in usersecrets but this is ok if we are using prod secrets ############");
+            Console.WriteLine("########### Didn't detect dev secrets in usersecrets but this is ok if we are using prod secrets ############");
         }
     }
 }
 
-builder.Services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration, "ZeroConf:AzureAd");
-builder.WebHost.UseUrls();
-// If this is initial run or there are new DB migrations they will be executed
-await ApiEnvironment.UpdateDbContexts();
+// Check for bootstrap.json to build SAM if needed
+ApiEnvironment.CheckForBootstrap();
 
-
-// No secrets from dev so let's try our prod secrets
+// No secrets from dev or bootstrap so let's try our prod secrets
 while (string.IsNullOrEmpty(ApiEnvironment.Secrets.TenantId) || string.IsNullOrWhiteSpace(ApiEnvironment.Secrets.TenantId))
 {
     // We will wait until we get a production secret source
@@ -149,30 +170,7 @@ builder.Configuration["ZeroConf:AzureAd:OpenIdClientId"] = zeroConf.OpenIdClient
 builder.Configuration["ZeroConf:AzureAd:Instance"] = zeroConf.Instance;
 builder.Configuration["ZeroConf:AzureAd:CallbackPath"] = zeroConf.CallbackPath;
 
-// Add auth services
-builder.Services.AddAuthentication();
-builder.Services.AddAuthorization();
-
-builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
-{
-    // This allows for our Web UI which may be at a totally different domain and/or port to comminucate with the API
-    builder.WithOrigins(corsUri).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
-}));
-
-// Add API versioning capabilities
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddApiVersioning(options =>
-{
-    options.AssumeDefaultVersionWhenUnspecified = true;
-    options.ReportApiVersions = true;
-    options.DefaultApiVersion = ApiEnvironment.ApiCurrent;
-}).AddApiExplorer(options =>
-{
-    options.SubstitutionFormat = "VV";
-    options.GroupNameFormat = "'v'VV";
-    options.SubstituteApiVersionInUrl = true;
-    options.AssumeDefaultVersionWhenUnspecified = true;
-});
+builder.Services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration, "ZeroConf:AzureAd");
 
 // Prep Swagger and specify the auth settings for it to use a SAM on Azure AD
 builder.Services.AddSwaggerGen(customSwagger => {
@@ -217,15 +215,6 @@ builder.Services.AddSwaggerGen(customSwagger => {
     });
 });
 
-// Configure JSON options
-builder.Services.Configure<JsonOptions>(options =>
-{
-    options.SerializerOptions.AllowTrailingCommas = false;
-
-    // Official CIPP-API has absolutely no standards for serializing JSON, we need this to match it, and it hurts my soul immensly.
-    options.SerializerOptions.PropertyNamingPolicy = null;
-});
-
 var app = builder.Build();
 
 app.UseCors("corsapp");
@@ -253,6 +242,8 @@ foreach (double version in ApiEnvironment.ApiRouteVersions)
 }
 
 ApiEnvironment.ApiVersionSet = apiVersionSetBuilder.ReportApiVersions().Build();
+
+ApiBootstrap.BootstrapRoutes.InitRoutes(ref app);
 
 // /x.x (ApiEnvironment.ApiDev) path which uses the latest devenv API specification (will only be accessible if ShowDevEnvEndpoints = true)
 ApiDev.Routes.InitRoutes(ref app);

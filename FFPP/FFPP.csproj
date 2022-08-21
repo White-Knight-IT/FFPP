@@ -75,6 +75,7 @@
     <None Remove="Pomelo.EntityFrameworkCore.MySql" />
     <None Remove="Microsoft.EntityFrameworkCore" />
     <None Remove="Versions\api\Bootstrap\" />
+    <None Remove="bootstrap.json.old" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="wwwroot\" />
@@ -88,6 +89,8 @@
     <Content Remove="plain.secrets.json" />
     <Content Remove="plain.secrets.json" />
     <Content Remove="encrypted.secrets.json" />
+    <Content Remove="bootstrap.json" />
+    <Content Remove="api.zeroconf.json" />
   </ItemGroup>
   <ItemGroup>
     <None Include="wwwroot\Swagger-Customisation\Swagger-Customisation.css">

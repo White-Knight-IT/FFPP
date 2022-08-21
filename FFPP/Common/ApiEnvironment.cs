@@ -82,6 +82,11 @@ namespace FFPP.Common
         public static void DataAndCacheDirectoriesBuild()
         {
             Directory.CreateDirectory(UsersPreFetchDir);
+            Directory.CreateDirectory(DataDir);
+            Directory.CreateDirectory(PersistentDir);
+            Console.WriteLine($"Cache Directory: {CacheDir}");
+            Console.WriteLine($"Data Directory: {DataDir}");
+            Console.WriteLine($"Persistent Directory: {PersistentDir}");
         }
 
         /// <summary>
@@ -262,6 +267,19 @@ namespace FFPP.Common
             ApiEnvironment.EntropyBytes = await File.ReadAllBytesAsync(UniqueEntropyBytesPath);
 
             return ApiEnvironment.EntropyBytes;
+        }
+
+        public static async void CheckForBootstrap()
+        {
+            // Bootstrap file exists and we don'r already have an app password
+            if (File.Exists(PersistentDir+"/bootstrap.json") && (string.IsNullOrEmpty(ApiEnvironment.Secrets.ApplicationSecret) || string.IsNullOrWhiteSpace(ApiEnvironment.Secrets.ApplicationSecret)))
+            {
+                Console.WriteLine("Found bootstrap.json");
+                JsonElement result = await Utilities.ReadJsonFromFile<JsonElement>(PersistentDir + "/bootstrap.json");
+                ApiEnvironment.Secrets.TenantId = result.GetProperty("TenantId").GetString();
+                ApiEnvironment.Secrets.ApplicationId = result.GetProperty("ApplicationId").GetString();
+                ApiEnvironment.Secrets.ApplicationSecret = result.GetProperty("ApplicationSecret").GetString();
+            }
         }
 
         // Gets the DeviceIdTokenSeed used as static entropy in DeviceId generation

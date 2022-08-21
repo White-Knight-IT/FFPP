@@ -802,9 +802,9 @@ namespace FFPP.Common
 					};
 
 
-					JsonElement createdSamApp = await RequestHelper.NewGraphPostRequest("https://graph.microsoft.com/v1.0/applications", ApiEnvironment.Secrets.TenantId, samApp, HttpMethod.Post, "https://graph.microsoft.com/Application.ReadWrite.All", false);
+					JsonElement createdSamApp = await RequestHelper.NewGraphPostRequest("https://graph.microsoft.com/v1.0/applications", ApiEnvironment.Secrets.TenantId, samApp, HttpMethod.Post, "https://graph.microsoft.com/.default", true);
 					await Task.Delay(20000); // Have to wait about 20 seconds for Azure to properly replicate the app before we can set password on it
-					var appPasswordJson = await RequestHelper.NewGraphPostRequest(string.Format("https://graph.microsoft.com/v1.0/applications/{0}/addPassword", createdSamApp.GetProperty("id").GetString()), ApiEnvironment.Secrets.TenantId, new PasswordCredential() { displayName="FFPP-Pwd" }, HttpMethod.Post, "https://graph.microsoft.com/Application.ReadWrite.All", false);
+					var appPasswordJson = await RequestHelper.NewGraphPostRequest(string.Format("https://graph.microsoft.com/v1.0/applications/{0}/addPassword", createdSamApp.GetProperty("id").GetString()), ApiEnvironment.Secrets.TenantId, new PasswordCredential() { displayName="FFPP-Pwd" }, HttpMethod.Post, "https://graph.microsoft.com/.default", true);
 					return new() { sam=createdSamApp, appPassword=appPasswordJson.GetProperty("secretText").GetString() ?? string.Empty };
 
 				case SamAppType.Spa:
@@ -818,7 +818,7 @@ namespace FFPP.Common
                         samApp.spa = new Spa() { redirectUris = spaRedirectUri };
                     }
 
-                    return new() { sam = await RequestHelper.NewGraphPostRequest("https://graph.microsoft.com/v1.0/applications", ApiEnvironment.Secrets.TenantId, samApp, HttpMethod.Post, "https://graph.microsoft.com/Application.ReadWrite.All", false)};
+                    return new() { sam = await RequestHelper.NewGraphPostRequest("https://graph.microsoft.com/v1.0/applications", ApiEnvironment.Secrets.TenantId, samApp, HttpMethod.Post, "https://graph.microsoft.com/.default", true)};
             }
 
             return new();
