@@ -7,11 +7,11 @@
     <RootNamespace>FFPP</RootNamespace>
     <UserSecretsId>590632f0-485c-441c-a9c5-d1e940f9dfa5</UserSecretsId>
     <ReleaseVersion>THIS_VERSION_IS_NOT_USED</ReleaseVersion>
+    <AssemblyName>ffpp</AssemblyName>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <WarningLevel>4</WarningLevel>
-    <AssemblyName>ffpp</AssemblyName>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>embedded</DebugType>
