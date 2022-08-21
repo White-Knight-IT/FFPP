@@ -134,7 +134,7 @@ if (ApiEnvironment.IsDebug)
 }
 
 // Check for bootstrap.json to build SAM if needed
-ApiEnvironment.CheckForBootstrap();
+await ApiEnvironment.CheckForBootstrap();
 
 // No secrets from dev or bootstrap so let's try our prod secrets
 while (string.IsNullOrEmpty(ApiEnvironment.Secrets.TenantId) || string.IsNullOrWhiteSpace(ApiEnvironment.Secrets.TenantId))
@@ -147,16 +147,11 @@ while (string.IsNullOrEmpty(ApiEnvironment.Secrets.TenantId) || string.IsNullOrW
     }
 }
 
-ApiEnvironment.HasCredentials = true;
-
 
 // We have yet to complete the Zero Configuration setup
 if (!ApiZeroConfiguration.ZeroConfExists())
 {
-    if (ApiEnvironment.HasCredentials)
-    {
-        await ApiZeroConfiguration.Setup(ApiEnvironment.Secrets.TenantId);
-    }
+    await ApiZeroConfiguration.Setup(ApiEnvironment.Secrets.TenantId);
 }
 
 // Read ZeroConf and load it into app config

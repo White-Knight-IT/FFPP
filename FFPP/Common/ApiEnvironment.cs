@@ -270,7 +270,7 @@ namespace FFPP.Common
             return ApiEnvironment.EntropyBytes;
         }
 
-        public static async void CheckForBootstrap()
+        public static async Task<bool> CheckForBootstrap()
         {
             // Bootstrap file exists and we don'r already have an app password
             if (File.Exists(PersistentDir+"/bootstrap.json") && (string.IsNullOrEmpty(ApiEnvironment.Secrets.ApplicationSecret) || string.IsNullOrWhiteSpace(ApiEnvironment.Secrets.ApplicationSecret)))
@@ -280,7 +280,16 @@ namespace FFPP.Common
                 ApiEnvironment.Secrets.TenantId = result.GetProperty("TenantId").GetString();
                 ApiEnvironment.Secrets.ApplicationId = result.GetProperty("ApplicationId").GetString();
                 ApiEnvironment.Secrets.ApplicationSecret = result.GetProperty("ApplicationSecret").GetString();
+
+                return true;
             }
+
+            return false;
+        }
+
+        public static async Task<string> GetDeviceTag()
+        {
+            return (await ApiEnvironment.GetDeviceIdTokenSeed())[^6..];
         }
 
         // Gets the DeviceIdTokenSeed used as static entropy in DeviceId generation
@@ -307,11 +316,6 @@ namespace FFPP.Common
 
                 throw ex;
             }
-        }
-
-        public static async Task<string> GetDeviceTag()
-        {
-            return UTF8Encoding.UTF8.GetString(await ApiEnvironment.GetDeviceId())[^6..];
         }
 
         /// <summary>
