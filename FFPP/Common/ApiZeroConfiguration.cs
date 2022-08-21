@@ -45,7 +45,7 @@ namespace FFPP.Common
 
             // step one - create SAM SPA that the Swagger UI will use to authenticate
 
-            JsonElement samSpa = (await Sam.CreateSAMAuthApp("FFPP UI", Sam.SamAppType.Spa, domain, spaRedirectUri: new string[] { string.Format("{0}/swagger/oauth2-redirect.html", ApiEnvironment.FfppFrontEndUri.TrimEnd('/')), string.Format("{0}/index.html", ApiEnvironment.FfppFrontEndUri.TrimEnd('/'))})).sam;
+            JsonElement samSpa = (await Sam.CreateSAMAuthApp("FFPP UI - "+ApiEnvironment.DeviceTag, Sam.SamAppType.Spa, domain, spaRedirectUri: new string[] { string.Format("{0}/swagger/oauth2-redirect.html", ApiEnvironment.FfppFrontEndUri.TrimEnd('/')), string.Format("{0}/index.html", ApiEnvironment.FfppFrontEndUri.TrimEnd('/'))})).sam;
             string openIdClientId = samSpa.GetProperty("appId").GetString() ?? string.Empty;
             if (!openIdClientId.Equals(string.Empty))
             {
@@ -53,7 +53,7 @@ namespace FFPP.Common
                 await Task.Delay(15000);
 
                 // step two - create SAM that will act as the authentication hub of the API
-                Sam.SamAndPassword result = await Sam.CreateSAMAuthApp("FFPP API", Sam.SamAppType.Api, domain, openIdClientId, scopeGuid: apiScopeGuid);
+                Sam.SamAndPassword result = await Sam.CreateSAMAuthApp("FFPP API - "+ApiEnvironment.DeviceTag, Sam.SamAppType.Api, domain, openIdClientId, scopeGuid: apiScopeGuid);
                 JsonElement samApi = result.sam;
                 string? appPassword = result.appPassword;
                 string clientId = samApi.GetProperty("appId").GetString() ?? string.Empty;

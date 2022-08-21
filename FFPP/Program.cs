@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Http.Json;
 using Microsoft.Identity.Web;
 using Microsoft.OpenApi.Models;
 using FFPP.Api.Bootstrap;
+using System.Text;
 
 Console.WriteLine(@"
     ________________  ____ 
@@ -48,20 +49,24 @@ ApiEnvironment.MysqlUser = builder.Configuration.GetValue<string>("ApiSettings:D
 ApiEnvironment.MysqlPassword = builder.Configuration.GetValue<string>("ApiSettings:DbSettings:MysqlPassword") ?? "wellknownpassword";
 ApiEnvironment.MysqlServer = builder.Configuration.GetValue<string>("ApiSettings:DbSettings:MysqlServer") ?? "localhost";
 ApiEnvironment.MysqlServerPort = builder.Configuration.GetValue<string>("ApiSettings:DbSettings:MysqlServerPort") ?? "7704";
-ApiEnvironment.CacheDir = builder.Configuration.GetValue<string>("ApiSettings:DbSettings:CachePath") ?? ApiEnvironment.DataDir;
-ApiEnvironment.PersistentDir = builder.Configuration.GetValue<string>("ApiSettings:DbSettings:PersistentPath") ?? ApiEnvironment.WorkingDir;
-
+ApiEnvironment.CacheDir = builder.Configuration.GetValue<string>("ApiSettings:CachePath") ?? ApiEnvironment.DataDir;
+ApiEnvironment.PersistentDir = builder.Configuration.GetValue<string>("ApiSettings:PersistentPath") ?? ApiEnvironment.WorkingDir;
+ApiEnvironment.FfppFrontEndUri = builder.Configuration.GetValue<string>("ApiSettings:WebUiUrl") ?? "http://localhost";
+ApiEnvironment.DeviceTag = await ApiEnvironment.GetDeviceTag();
 string kestrelHttps = builder.Configuration.GetValue<string>("Kestrel:Endpoints:Https:Url") ?? "https://localhost:7074";
 string kestrelHttp = builder.Configuration.GetValue<string>("Kestrel:Endpoints:Http:Url") ?? "https://localhost:7073";
 
 // CORS policy to allow the UI to access the API
-string[] corsUris = new string[]{ builder.Configuration["ApiSettings:WebUiUrl"], kestrelHttps, kestrelHttp } ?? new string[]{kestrelHttps,kestrelHttp};
+string[] corsUris = new string[]{ ApiEnvironment.FfppFrontEndUri, kestrelHttps, kestrelHttp } ?? new string[]{kestrelHttps,kestrelHttp};
 
 builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
 {
     // This allows for our Web UI which may be at a totally different domain and/or port to comminucate with the API
     builder.WithOrigins(corsUris).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
 }));
+
+// Build Data/Cache directories if they don't exist
+ApiEnvironment.DataAndCacheDirectoriesBuild();
 
 // Add auth services
 builder.Services.AddAuthentication();
@@ -94,9 +99,6 @@ builder.Services.Configure<JsonOptions>(options =>
 builder.WebHost.UseUrls();
 
 await ApiEnvironment.UpdateDbContexts();
-
-// Build Data/Cache directories if they don't exist
-ApiEnvironment.DataAndCacheDirectoriesBuild();
 
 await ApiEnvironment.GetEntropyBytes();
 

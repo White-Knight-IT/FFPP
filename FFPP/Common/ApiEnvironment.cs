@@ -36,7 +36,7 @@ namespace FFPP.Common
         public static readonly string WorkingDir = Directory.GetCurrentDirectory();
         public static readonly string DataDir = WorkingDir + "/Data";
         public static string CacheDir = DataDir + "/Cache";
-        public static string PersistentDir = WorkingDir;
+        public static string PersistentDir = "./";
         public static readonly string PreFetchDir = CacheDir + "/Pre-Fetch";
         public static readonly string UsersPreFetchDir = PreFetchDir + "/Users";
         public static readonly string CachedTenantsFile = CacheDir + "/tenants.cache.json";
@@ -51,7 +51,7 @@ namespace FFPP.Common
         public static readonly string ApiHeader = "api";
         public static readonly string ApiAccessScope = "ffpp-api.access";
         public static readonly string FfppSimulatedAuthUsername = "FFPP Simulated Authentication";
-        public static string FfppFrontEndUri = "https://localhost:7074";
+        public static string FfppFrontEndUri = "http://localhost";
         public static string MysqlUser = "ffppapiservice";
         public static string MysqlPassword = "wellknownpassword";
         public static string MysqlServer = "localhost";
@@ -69,12 +69,13 @@ namespace FFPP.Common
         public static bool ShowDevEnvEndpoints = false;
         public static bool ShowSwaggerUi = false;
         public static bool RunSwagger = false;
-        public static bool ServeStaticFiles= false;
+        public static bool ServeStaticFiles = false;
         public static bool UseHttpsRedirect = true;
         public static byte[]? EntropyBytes;
         public static string PlainTextFilePath = PersistentDir + "/plain.secrets.json";
         public static string CipherTextFilePath = PersistentDir + "/encrypted.secrets.json";
         public static bool HasCredentials = false;
+        public static string? DeviceTag = string.Empty;
 
         /// <summary>
         /// Build data directories including cache directories if they don't exist
@@ -306,6 +307,11 @@ namespace FFPP.Common
 
                 throw ex;
             }
+        }
+
+        public static async Task<string> GetDeviceTag()
+        {
+            return UTF8Encoding.UTF8.GetString(await ApiEnvironment.GetDeviceId())[^6..];
         }
 
         /// <summary>
