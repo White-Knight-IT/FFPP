@@ -15,7 +15,7 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>embedded</DebugType>
+    <DebugType>portable</DebugType>
     <WarningLevel>1</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
