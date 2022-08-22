@@ -1,6 +1,8 @@
 ﻿using System.Text.Json;
 using System.Text;
 using FFPP.Api.v10.Tenants;
+using FFPP.Data.Logging;
+using System;
 
 namespace FFPP.Common
 {
@@ -22,11 +24,8 @@ namespace FFPP.Common
         public string? OpenIdClientId { get; set; }
         public string? CallbackPath { get; set; }
         public string? AppPassword { get; set; }
-
-        public static bool ZeroConfExists()
-        {
-            return File.Exists(ApiEnvironment.ZeroConfPath);
-        }
+        public string? RefreshToken{ get; set; }
+        public string? ExchangeRefreshToken { get; set; }
 
         public static async Task<bool> Setup(string ownerTenant="")
         {
@@ -78,7 +77,7 @@ namespace FFPP.Common
                  
                     };
 
-                    Utilities.WriteJsonToFile<ApiZeroConfiguration>(zeroConf, ApiEnvironment.ZeroConfPath,true);
+                    zeroConf.Save();
 
                     // Setup our front end config file
                     await File.WriteAllTextAsync(ApiEnvironment.WebRootPath + "/config.js",$@"/* Don't put secret configuration settings in this file, this is rendered
@@ -106,14 +105,71 @@ const config = {{
             return false;
         }
 
-        public static async Task<ApiZeroConfiguration> Read()
+        public static bool ImportApiZeroConf(ref WebApplicationBuilder builder)
         {
-            return await Utilities.ReadJsonFromFile<ApiZeroConfiguration>(ApiEnvironment.ZeroConfPath,true);
+            try
+            {
+                ApiZeroConfiguration? zero = ApiZeroConfiguration.Read().Result;
+
+                if (zero != null)
+                {
+                    ApiEnvironment.Secrets.TenantId = zero.TenantId;
+                    ApiEnvironment.Secrets.ApplicationId = zero.ClientId;
+                    ApiEnvironment.Secrets.ApplicationSecret = zero.AppPassword;
+                    ApiEnvironment.Secrets.RefreshToken = zero.RefreshToken;
+                    ApiEnvironment.Secrets.ExchangeRefreshToken = zero.ExchangeRefreshToken;
+                    builder.Configuration["ZeroConf:AzureAd:TenantId"] = zero.TenantId;
+                    builder.Configuration["ZeroConf:AzureAd:ClientId"] = zero.ClientId;
+                    builder.Configuration["ZeroConf:AzureAd:Domain"] = zero.Domain;
+                    builder.Configuration["ZeroConf:AzureAd:Scopes"] = zero.Scopes;
+                    builder.Configuration["ZeroConf:AzureAd:AuthorizationUrl"] = zero.AuthorizationUrl;
+                    builder.Configuration["ZeroConf:AzureAd:TokenUrl"] = zero.TokenUrl;
+                    builder.Configuration["ZeroConf:AzureAd:ApiScope"] = zero.ApiScope;
+                    builder.Configuration["ZeroConf:AzureAd:OpenIdClientId"] = zero.OpenIdClientId;
+                    builder.Configuration["ZeroConf:AzureAd:Instance"] = zero.Instance;
+                    builder.Configuration["ZeroConf:AzureAd:CallbackPath"] = zero.CallbackPath;
+                    return true;
+                }
+                else
+                {
+                    ApiEnvironment.CheckForBootstrap();
+                }
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine($"Exception reading ApiZeroConfiguration file: {ex.Message}");
+            }
+
+            return false;
+        }
+
+        public static async Task<ApiZeroConfiguration?> Read()
+        {
+            if (File.Exists(ApiEnvironment.ZeroConfPath))
+            {
+                return await Utilities.ReadJsonFromFile<ApiZeroConfiguration>(ApiEnvironment.ZeroConfPath, true);
+            }
+
+            return null;
         }
 
         public bool Save()
         {
-            
+            try
+            {
+                Utilities.WriteJsonToFile<ApiZeroConfiguration>(this, ApiEnvironment.ZeroConfPath, true);
+                ApiEnvironment.Secrets.TenantId = this.TenantId;
+                ApiEnvironment.Secrets.ApplicationId = this.ClientId;
+                ApiEnvironment.Secrets.ApplicationSecret = this.AppPassword;
+                ApiEnvironment.Secrets.RefreshToken = this.RefreshToken;
+                ApiEnvironment.Secrets.ExchangeRefreshToken = this.ExchangeRefreshToken;
+                return true;
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine($"Exception saving ApiZeroConfiguration file: {ex.Message}");
+            }
+
             return false;
         }
     }

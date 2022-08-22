@@ -72,8 +72,6 @@ namespace FFPP.Common
         public static bool ServeStaticFiles = false;
         public static bool UseHttpsRedirect = true;
         public static byte[]? EntropyBytes;
-        public static string PlainTextFilePath = PersistentDir + "/plain.secrets.json";
-        public static string CipherTextFilePath = PersistentDir + "/encrypted.secrets.json";
         public static bool HasCredentials = false;
         public static string? DeviceTag = string.Empty;
 
@@ -97,14 +95,6 @@ namespace FFPP.Common
         public static FfppVersion GetApiBinaryVersion()
         {
             return new(File.ReadLines(ApiVersionFile).First());
-        }
-
-        /// <summary>
-        ///  Checks that the DBs exist and if they don't create them
-        /// </summary>
-        public static async void CheckCreateDbs()
-        {
-            
         }
 
         /// <summary>
@@ -153,68 +143,6 @@ namespace FFPP.Common
 
                 throw ex;
             }
-        }
-
-        public static async Task<bool> GetProductionSecrets(ProductionSecretStores store)
-        { 
-            try
-            {
-                JsonElement plainSecrets;
-
-                if (!File.Exists(CipherTextFilePath))
-                {
-                    if (!File.Exists(PlainTextFilePath))
-                    {
-                        // No encrypted secrets and no plain secrets to ingest, uh oh, sad face
-                        throw new Exception("No encrypted secrets file exists, nor any plain secrets file to build encrypted secrets. Please create plain.secrets.json file in Data directory.");
-                    }
-
-                    try
-                    {
-                        string plainSecretsJsonString = await File.ReadAllTextAsync(PlainTextFilePath);
-                        // We have a plain secrets file to ingest, encrypt and then dispose of
-                        plainSecrets = (JsonElement)JsonSerializer.Deserialize(plainSecretsJsonString, typeof(JsonElement));
-
-                        await File.WriteAllTextAsync(CipherTextFilePath, await Utilities.Crypto.AesEncrypt(plainSecretsJsonString, await GetDeviceId()));
-
-                    }
-                    catch(Exception ex)
-                    {
-                        FfppLogsDbContext.DebugConsoleWrite($"Invalid JSON in plain.secrets.json file! {ex.Message}");
-                        throw new Exception($"Invalid JSON in plain.secrets.json file! {ex.Message}");
-                    }
-
-                    // Overwrite plain.secrets.json file
-                    await File.WriteAllTextAsync(PlainTextFilePath, Utilities.RandomByteString());
-
-                    //Now delete plain text file
-                    File.Delete(PlainTextFilePath);
-                }
-
-                // We have encrypted secrets file
-
-                string plain = await Utilities.Crypto.AesDecrypt(await File.ReadAllTextAsync(CipherTextFilePath), await GetDeviceId());
-                plainSecrets = (JsonElement)JsonSerializer.Deserialize(plain, typeof(JsonElement));
-                Secrets.ApplicationId = plainSecrets.GetProperty("ApplicationId").GetString();
-                Secrets.ApplicationSecret = plainSecrets.GetProperty("ApplicationSecret").GetString();
-                Secrets.TenantId = plainSecrets.GetProperty("TenantId").GetString();
-                Secrets.RefreshToken = plainSecrets.GetProperty("RefreshToken").GetString();
-                Secrets.ExchangeRefreshToken = plainSecrets.GetProperty("ExchangeRefreshToken").GetString();
-            }
-            catch(Exception ex)
-            {
-                FfppLogsDbThreadSafeCoordinator.ThreadSafeAdd(new FfppLogsDbContext.LogEntry()
-                {
-                    Message = $"Exception Encrypting or Decrypting Secrets (GetProductionSecrets): {ex.Message} ",
-                    Username = "FFPP",
-                    Severity = "Error",
-                    API = "GetProductionSecrets"
-                });
-
-                return false;
-            }
-
-            return true;
         }
 
         /// <summary>
@@ -273,13 +201,15 @@ namespace FFPP.Common
         public static async Task<bool> CheckForBootstrap()
         {
             // Bootstrap file exists and we don'r already have an app password
-            if (File.Exists(PersistentDir+"/bootstrap.json") && (string.IsNullOrEmpty(ApiEnvironment.Secrets.ApplicationSecret) || string.IsNullOrWhiteSpace(ApiEnvironment.Secrets.ApplicationSecret)))
+            if (File.Exists(PersistentDir+"/bootstrap.json"))
             {
                 Console.WriteLine("Found bootstrap.json");
                 JsonElement result = await Utilities.ReadJsonFromFile<JsonElement>(PersistentDir + "/bootstrap.json");
                 ApiEnvironment.Secrets.TenantId = result.GetProperty("TenantId").GetString();
                 ApiEnvironment.Secrets.ApplicationId = result.GetProperty("ApplicationId").GetString();
                 ApiEnvironment.Secrets.ApplicationSecret = result.GetProperty("ApplicationSecret").GetString();
+
+                await ApiZeroConfiguration.Setup(ApiEnvironment.Secrets.TenantId);
 
                 return true;
             }

@@ -57,6 +57,18 @@ ApiEnvironment.DeviceTag = await ApiEnvironment.GetDeviceTag();
 string kestrelHttps = builder.Configuration.GetValue<string>("Kestrel:Endpoints:Https:Url") ?? "https://localhost:7074";
 string kestrelHttp = builder.Configuration.GetValue<string>("Kestrel:Endpoints:Http:Url") ?? "https://localhost:7073";
 
+// These bytes form the basis of persistent but importantly unique seed entropy throughout crypto functions in this API
+await ApiEnvironment.GetEntropyBytes();
+
+// We will import our ApiZeroConf settings else try find bootstrap app to build from
+while (!ApiZeroConfiguration.ImportApiZeroConf(ref builder))
+{
+    Console.WriteLine("Waiting for bootstrap.json to provision the API...");
+    Thread.CurrentThread.Join(5000);
+}
+
+builder.Services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration, "ZeroConf:AzureAd");
+
 // CORS policy to allow the UI to access the API
 string[] corsUris = new string[]{ ApiEnvironment.FfppFrontEndUri, kestrelHttps, kestrelHttp } ?? new string[]{kestrelHttps,kestrelHttp};
 
@@ -101,8 +113,6 @@ builder.WebHost.UseUrls();
 
 await ApiEnvironment.UpdateDbContexts();
 
-await ApiEnvironment.GetEntropyBytes();
-
 // Expose development environment API endpoints if set in settings to do so
 if (ApiEnvironment.ShowDevEnvEndpoints)
 {
@@ -117,58 +127,8 @@ if (ApiEnvironment.IsDebug)
     if (builder.Environment.IsDevelopment())
     {
         Console.WriteLine("######################## FFPP is running from a development environment");
-
-        // development environment secret source (dotnet user-secrets)
-        try
-        {
-            ApiEnvironment.Secrets.ApplicationId = builder.Configuration["ApplicationId"];
-            ApiEnvironment.Secrets.ApplicationSecret = builder.Configuration["ApplicationSecret"];
-            ApiEnvironment.Secrets.TenantId = builder.Configuration["TenantId"];
-            ApiEnvironment.Secrets.RefreshToken = builder.Configuration["RefreshToken"];
-            ApiEnvironment.Secrets.ExchangeRefreshToken = builder.Configuration["ExchangeRefreshToken"];
-        }
-        catch
-        {
-            Console.WriteLine("########### Didn't detect dev secrets in usersecrets but this is ok if we are using prod secrets ############");
-        }
     }
 }
-
-// Check for bootstrap.json to build SAM if needed
-await ApiEnvironment.CheckForBootstrap();
-
-// No secrets from dev or bootstrap so let's try our prod secrets
-while (string.IsNullOrEmpty(ApiEnvironment.Secrets.TenantId) || string.IsNullOrWhiteSpace(ApiEnvironment.Secrets.TenantId))
-{
-    // We will wait until we get a production secret source
-    while (!ApiEnvironment.GetProductionSecrets(ApiEnvironment.ProductionSecretStores.EncryptedFile).Result)
-    {
-        Console.WriteLine("######################## Please provide a secrets file");
-        Thread.CurrentThread.Join(1000);
-    }
-}
-
-
-// We have yet to complete the Zero Configuration setup
-if (!ApiZeroConfiguration.ZeroConfExists())
-{
-    await ApiZeroConfiguration.Setup(ApiEnvironment.Secrets.TenantId);
-}
-
-// Read ZeroConf and load it into app config
-ApiZeroConfiguration zeroConf = await Utilities.ReadJsonFromFile<ApiZeroConfiguration>(ApiEnvironment.ZeroConfPath,true);
-builder.Configuration["ZeroConf:AzureAd:TenantId"] = zeroConf.TenantId;
-builder.Configuration["ZeroConf:AzureAd:ClientId"] = zeroConf.ClientId;
-builder.Configuration["ZeroConf:AzureAd:Domain"] = zeroConf.Domain;
-builder.Configuration["ZeroConf:AzureAd:Scopes"] = zeroConf.Scopes;
-builder.Configuration["ZeroConf:AzureAd:AuthorizationUrl"] = zeroConf.AuthorizationUrl;
-builder.Configuration["ZeroConf:AzureAd:TokenUrl"] = zeroConf.TokenUrl;
-builder.Configuration["ZeroConf:AzureAd:ApiScope"] = zeroConf.ApiScope;
-builder.Configuration["ZeroConf:AzureAd:OpenIdClientId"] = zeroConf.OpenIdClientId;
-builder.Configuration["ZeroConf:AzureAd:Instance"] = zeroConf.Instance;
-builder.Configuration["ZeroConf:AzureAd:CallbackPath"] = zeroConf.CallbackPath;
-
-builder.Services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration, "ZeroConf:AzureAd");
 
 // Prep Swagger and specify the auth settings for it to use a SAM on Azure AD
 builder.Services.AddSwaggerGen(customSwagger => {
