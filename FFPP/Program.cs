@@ -49,9 +49,9 @@ ApiEnvironment.MysqlUser = builder.Configuration.GetValue<string>("ApiSettings:D
 ApiEnvironment.MysqlPassword = builder.Configuration.GetValue<string>("ApiSettings:DbSettings:MysqlPassword") ?? "wellknownpassword";
 ApiEnvironment.MysqlServer = builder.Configuration.GetValue<string>("ApiSettings:DbSettings:MysqlServer") ?? "localhost";
 ApiEnvironment.MysqlServerPort = builder.Configuration.GetValue<string>("ApiSettings:DbSettings:MysqlServerPort") ?? "7704";
-ApiEnvironment.CacheDir = builder.Configuration.GetValue<string>("ApiSettings:CachePath") ?? ApiEnvironment.DataDir;
+ApiEnvironment.CacheDir = builder.Configuration.GetValue<string>("ApiSettings:CachePath") ?? $"{ApiEnvironment.DataDir}/Cache";
 ApiEnvironment.PersistentDir = builder.Configuration.GetValue<string>("ApiSettings:PersistentPath") ?? ApiEnvironment.WorkingDir;
-ApiEnvironment.WebRootPath = builder.Configuration.GetValue<string>("ApiSettings:WebRootPath") ?? ApiEnvironment.WorkingDir + "/wwwroot";
+ApiEnvironment.WebRootPath = builder.Configuration.GetValue<string>("ApiSettings:WebRootPath") ?? $"{ApiEnvironment.WorkingDir}/wwwroot";
 ApiEnvironment.FfppFrontEndUri = builder.Configuration.GetValue<string>("ApiSettings:WebUiUrl") ?? "http://localhost";
 ApiEnvironment.DeviceTag = await ApiEnvironment.GetDeviceTag();
 string kestrelHttps = builder.Configuration.GetValue<string>("Kestrel:Endpoints:Https:Url") ?? "https://localhost:7074";
@@ -64,9 +64,10 @@ await ApiEnvironment.GetEntropyBytes();
 while (!ApiZeroConfiguration.ImportApiZeroConf(ref builder))
 {
     Console.WriteLine("Waiting for bootstrap.json to provision the API...");
-    Thread.CurrentThread.Join(5000);
+    Thread.CurrentThread.Join(10000);
 }
 
+// Ties the API to an Azure AD app for auth
 builder.Services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration, "ZeroConf:AzureAd");
 
 // CORS policy to allow the UI to access the API

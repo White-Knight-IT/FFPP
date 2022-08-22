@@ -16,7 +16,7 @@
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>portable</DebugType>
-    <WarningLevel>1</WarningLevel>
+    <WarningLevel>0</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
@@ -84,6 +84,8 @@
     <None Remove="Microsoft.EntityFrameworkCore" />
     <None Remove="Versions\api\Bootstrap\" />
     <None Remove="bootstrap.json.old" />
+    <None Remove="unique.entropy.bytes" />
+    <None Remove="device.id.token" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="wwwroot\" />

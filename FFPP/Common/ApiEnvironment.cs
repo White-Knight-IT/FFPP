@@ -28,25 +28,26 @@ namespace FFPP.Common
         public static readonly string RoleAdmin = "admin";
         public static readonly string RoleEditor = "editor";
         public static readonly string RoleReader = "reader";
-        #if DEBUG
+#if DEBUG
         public static readonly bool IsDebug = true;
-        #else
+#else
         public static readonly bool IsDebug = false;
-        #endif
+#endif
         public static readonly string WorkingDir = Directory.GetCurrentDirectory();
-        public static readonly string DataDir = WorkingDir + "/Data";
-        public static string CacheDir = DataDir + "/Cache";
+        public static readonly string DataDir = $"{WorkingDir}/Data";
+        public static string CacheDir = $"{DataDir}/Cache";
         public static string PersistentDir = "./";
-        public static readonly string PreFetchDir = CacheDir + "/Pre-Fetch";
-        public static readonly string UsersPreFetchDir = PreFetchDir + "/Users";
-        public static readonly string CachedTenantsFile = CacheDir + "/tenants.cache.json";
-        public static readonly string LicenseConversionTableFile = DataDir + "/ConversionTable.csv";
-        public static readonly string LicenseConversionTableMisfitsFile = DataDir + "/ConversionTableMisfits.csv";
-        public static readonly string ZeroConfPath = PersistentDir + "/api.zeroconf.json";
-        public static readonly string ApiVersionFile = WorkingDir + "/version_latest.txt";
-        public static readonly string DeviceTokenPath = PersistentDir + "/device.id.token";
-        public static readonly string UniqueEntropyBytesPath = PersistentDir + "/unique.entropy.bytes";
-        public static string WebRootPath = WorkingDir + "/wwwroot";
+        public static readonly string PreFetchDir = $"{CacheDir}/Pre-Fetch";
+        public static readonly string UsersPreFetchDir = $"{PreFetchDir}/Users";
+        public static readonly string CachedTenantsFile = $"{CacheDir}/tenants.cache.json";
+        public static readonly string LicenseConversionTableFile = $"{DataDir}/ConversionTable.csv";
+        public static readonly string LicenseConversionTableMisfitsFile = $"{DataDir}/ConversionTableMisfits.csv";
+        public static readonly string ZeroConfPath = $"{PersistentDir}/api.zeroconf.json";
+        public static readonly string ApiVersionFile = $"{WorkingDir}/version_latest.txt";
+        public static readonly string DeviceTokenPath = $"{PersistentDir}/device.id.token";
+        public static readonly string UniqueEntropyBytesPath = $"{PersistentDir}/unique.entropy.bytes";
+        public static string BootStrapPath = $"{PersistentDir}/bootstrap.json";
+        public static string WebRootPath = $"{WorkingDir}/wwwroot";
         public static readonly string ApiBinaryVersion = File.ReadAllText(ApiVersionFile);
         public static readonly string ApiHeader = "api";
         public static readonly string ApiAccessScope = "ffpp-api.access";
@@ -201,16 +202,17 @@ namespace FFPP.Common
         public static async Task<bool> CheckForBootstrap()
         {
             // Bootstrap file exists and we don'r already have an app password
-            if (File.Exists(PersistentDir+"/bootstrap.json"))
+            if (File.Exists(ApiEnvironment.BootStrapPath))
             {
                 Console.WriteLine("Found bootstrap.json");
-                JsonElement result = await Utilities.ReadJsonFromFile<JsonElement>(PersistentDir + "/bootstrap.json");
+                JsonElement result = await Utilities.ReadJsonFromFile<JsonElement>(ApiEnvironment.BootStrapPath);
                 ApiEnvironment.Secrets.TenantId = result.GetProperty("TenantId").GetString();
                 ApiEnvironment.Secrets.ApplicationId = result.GetProperty("ApplicationId").GetString();
                 ApiEnvironment.Secrets.ApplicationSecret = result.GetProperty("ApplicationSecret").GetString();
 
                 await ApiZeroConfiguration.Setup(ApiEnvironment.Secrets.TenantId);
-
+                await File.WriteAllTextAsync(ApiEnvironment.BootStrapPath, Utilities.RandomByteString(1024));
+                File.Delete(ApiEnvironment.BootStrapPath);
                 return true;
             }
 
