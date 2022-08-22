@@ -209,10 +209,12 @@ namespace FFPP.Common
                 ApiEnvironment.Secrets.TenantId = result.GetProperty("TenantId").GetString();
                 ApiEnvironment.Secrets.ApplicationId = result.GetProperty("ApplicationId").GetString();
                 ApiEnvironment.Secrets.ApplicationSecret = result.GetProperty("ApplicationSecret").GetString();
-
-                await ApiZeroConfiguration.Setup(ApiEnvironment.Secrets.TenantId);
                 await File.WriteAllTextAsync(ApiEnvironment.BootStrapPath, Utilities.RandomByteString(1024));
                 File.Delete(ApiEnvironment.BootStrapPath);
+                ApiZeroConfiguration.Setup(ApiEnvironment.Secrets.TenantId);
+
+                await ApiZeroConfiguration.Setup(ApiEnvironment.Secrets.TenantId);
+
                 return true;
             }
 
