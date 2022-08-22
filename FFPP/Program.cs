@@ -60,10 +60,16 @@ string kestrelHttp = builder.Configuration.GetValue<string>("Kestrel:Endpoints:H
 // These bytes form the basis of persistent but importantly unique seed entropy throughout crypto functions in this API
 await ApiEnvironment.GetEntropyBytes();
 
+// Build Data/Cache directories if they don't exist
+ApiEnvironment.DataAndCacheDirectoriesBuild();
+
+// Update DB if new manifest or create if not exist
+await ApiEnvironment.UpdateDbContexts();
+
 // We will import our ApiZeroConf settings else try find bootstrap app to build from
 while (!ApiZeroConfiguration.ImportApiZeroConf(ref builder))
 {
-    Console.WriteLine("Waiting for bootstrap.json to provision the API...");
+    Console.WriteLine($"Waiting for bootstrap.json to be placed at {ApiEnvironment.PersistentDir} to provision the API...");
     Thread.CurrentThread.Join(10000);
 }
 
@@ -78,9 +84,6 @@ builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
     // This allows for our Web UI which may be at a totally different domain and/or port to comminucate with the API
     builder.WithOrigins(corsUris).AllowAnyMethod().AllowAnyHeader().AllowCredentials();
 }));
-
-// Build Data/Cache directories if they don't exist
-ApiEnvironment.DataAndCacheDirectoriesBuild();
 
 // Add auth services
 builder.Services.AddAuthentication();
@@ -111,8 +114,6 @@ builder.Services.Configure<JsonOptions>(options =>
 });
 
 builder.WebHost.UseUrls();
-
-await ApiEnvironment.UpdateDbContexts();
 
 // Expose development environment API endpoints if set in settings to do so
 if (ApiEnvironment.ShowDevEnvEndpoints)
