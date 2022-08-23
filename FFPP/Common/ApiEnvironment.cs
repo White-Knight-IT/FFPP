@@ -44,7 +44,6 @@ namespace FFPP.Common
         public static readonly string LicenseConversionTableMisfitsFile = $"{DataDir}/ConversionTableMisfits.csv";
         public static readonly string ZeroConfPath = $"{PersistentDir}/api.zeroconf.json";
         public static readonly string ApiVersionFile = $"{WorkingDir}/version_latest.txt";
-        public static readonly string DeviceTokenPath = $"{PersistentDir}/device.id.token";
         public static readonly string UniqueEntropyBytesPath = $"{PersistentDir}/unique.entropy.bytes";
         public static string WebRootPath = $"{WorkingDir}/wwwroot";
         public static readonly string ApiBinaryVersion = File.ReadAllText(ApiVersionFile);
@@ -109,7 +108,7 @@ namespace FFPP.Common
             try
             {
                 byte[] hashyBytes = HMACSHA512.HashData(hmacSalt,UTF8Encoding.UTF8.GetBytes(new DeviceIdBuilder()
-                    .AddFileToken(DeviceTokenPath) // Random entropy makes DeviceId unobtainable by someone without device access
+                    .AddFileToken($"{PersistentDir}/device.id.token") // Random entropy makes DeviceId unobtainable by someone without device access
                     .OnWindows(windows => windows
                         .AddProcessorId()
                         .AddMotherboardSerialNumber()
@@ -122,8 +121,8 @@ namespace FFPP.Common
                         .AddSystemDriveSerialNumber()
                         .AddPlatformSerialNumber()).ToString()));
 
-                // key strech the device id using 973028 HMACSHA512 iterations
-                for (int i=0; i<973028; i++)
+                // key strech the device id using 273028 HMACSHA512 iterations
+                for (int i=0; i<273028; i++)
                 {
                     hashyBytes = HMACSHA512.HashData(hmacSalt, hashyBytes);
                 }
@@ -200,16 +199,18 @@ namespace FFPP.Common
 
         public static async Task<bool> CheckForBootstrap()
         {
+            string bootstrapPath = $"{PersistentDir}/bootstrap.json";
+
             // Bootstrap file exists and we don't already have an app password
-            if (File.Exists($"{PersistentDir}/bootstrap.json"))
+            if (File.Exists(bootstrapPath))
             {
-                Console.WriteLine($"Found bootstrap.json at {PersistentDir}/bootstrap.json");
-                JsonElement result = await Utilities.ReadJsonFromFile<JsonElement>($"{PersistentDir}/bootstrap.json");
+                Console.WriteLine($"Found bootstrap.json at {bootstrapPath}");
+                JsonElement result = await Utilities.ReadJsonFromFile<JsonElement>(bootstrapPath);
                 ApiEnvironment.Secrets.TenantId = result.GetProperty("TenantId").GetString();
                 ApiEnvironment.Secrets.ApplicationId = result.GetProperty("ApplicationId").GetString();
                 ApiEnvironment.Secrets.ApplicationSecret = result.GetProperty("ApplicationSecret").GetString();
-                await File.WriteAllTextAsync($"{PersistentDir}/bootstrap.json", Utilities.RandomByteString(1024));
-                File.Delete($"{PersistentDir}/bootstrap.json");
+                await File.WriteAllTextAsync(bootstrapPath, Utilities.RandomByteString(1024));
+                File.Delete(bootstrapPath);
                 await ApiZeroConfiguration.Setup(ApiEnvironment.Secrets.TenantId);
 
                 return true;
@@ -228,12 +229,14 @@ namespace FFPP.Common
         {
             try
             {
-                if (!File.Exists(DeviceTokenPath))
+                string deviceTokenPath = $"{PersistentDir}/device.id.token";
+
+                if (!File.Exists(deviceTokenPath))
                 {
-                    await File.WriteAllTextAsync(DeviceTokenPath, Guid.NewGuid().ToString());
+                    await File.WriteAllTextAsync(deviceTokenPath, Guid.NewGuid().ToString());
                 }
 
-                return (await File.ReadAllTextAsync(DeviceTokenPath)).TrimEnd('\n').Trim();
+                return (await File.ReadAllTextAsync(deviceTokenPath)).TrimEnd('\n').Trim();
             }
             catch(Exception ex)
             {
