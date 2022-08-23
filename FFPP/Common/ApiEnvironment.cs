@@ -46,7 +46,6 @@ namespace FFPP.Common
         public static readonly string ApiVersionFile = $"{WorkingDir}/version_latest.txt";
         public static readonly string DeviceTokenPath = $"{PersistentDir}/device.id.token";
         public static readonly string UniqueEntropyBytesPath = $"{PersistentDir}/unique.entropy.bytes";
-        public static string BootStrapPath = $"{PersistentDir}/bootstrap.json";
         public static string WebRootPath = $"{WorkingDir}/wwwroot";
         public static readonly string ApiBinaryVersion = File.ReadAllText(ApiVersionFile);
         public static readonly string ApiHeader = "api";
@@ -201,18 +200,16 @@ namespace FFPP.Common
 
         public static async Task<bool> CheckForBootstrap()
         {
-            // Bootstrap file exists and we don'r already have an app password
-            if (File.Exists(ApiEnvironment.BootStrapPath))
+            // Bootstrap file exists and we don't already have an app password
+            if (File.Exists($"{PersistentDir}/bootstrap.json"))
             {
-                Console.WriteLine("Found bootstrap.json");
-                JsonElement result = await Utilities.ReadJsonFromFile<JsonElement>(ApiEnvironment.BootStrapPath);
+                Console.WriteLine($"Found bootstrap.json at {PersistentDir}/bootstrap.json");
+                JsonElement result = await Utilities.ReadJsonFromFile<JsonElement>($"{PersistentDir}/bootstrap.json");
                 ApiEnvironment.Secrets.TenantId = result.GetProperty("TenantId").GetString();
                 ApiEnvironment.Secrets.ApplicationId = result.GetProperty("ApplicationId").GetString();
                 ApiEnvironment.Secrets.ApplicationSecret = result.GetProperty("ApplicationSecret").GetString();
-                await File.WriteAllTextAsync(ApiEnvironment.BootStrapPath, Utilities.RandomByteString(1024));
-                File.Delete(ApiEnvironment.BootStrapPath);
-                ApiZeroConfiguration.Setup(ApiEnvironment.Secrets.TenantId);
-
+                await File.WriteAllTextAsync($"{PersistentDir}/bootstrap.json", Utilities.RandomByteString(1024));
+                File.Delete($"{PersistentDir}/bootstrap.json");
                 await ApiZeroConfiguration.Setup(ApiEnvironment.Secrets.TenantId);
 
                 return true;
@@ -236,7 +233,7 @@ namespace FFPP.Common
                     await File.WriteAllTextAsync(DeviceTokenPath, Guid.NewGuid().ToString());
                 }
 
-                return await File.ReadAllTextAsync(DeviceTokenPath);
+                return (await File.ReadAllTextAsync(DeviceTokenPath)).TrimEnd('\n').Trim();
             }
             catch(Exception ex)
             {

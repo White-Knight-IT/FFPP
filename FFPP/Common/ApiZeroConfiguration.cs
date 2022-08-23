@@ -130,9 +130,9 @@ const config = {{
                     builder.Configuration["ZeroConf:AzureAd:CallbackPath"] = zero.CallbackPath;
                     return true;
                 }
-                else
+                else if (!ApiEnvironment.CheckForBootstrap().Result)
                 {
-                    ApiEnvironment.CheckForBootstrap();
+                    Console.WriteLine($"Waiting for bootstrap.json to be placed at {ApiEnvironment.PersistentDir} to provision the API...");
                 }
             }
             catch(Exception ex)

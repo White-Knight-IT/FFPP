@@ -17,7 +17,6 @@ namespace FFPP.Common
 	{
 		private static readonly HttpClient _httpClient = new();
 
-		#region Public Methods
 		/// <summary>
 		/// Converts a known exception message into something more relatable to the user
 		/// </summary>
@@ -961,9 +960,7 @@ namespace FFPP.Common
 			public string CmdletName { get; set; }
 			public object Parameters { get; set;  }
         }
-		#endregion
 
-		#region Private Methods
 		// Makes sure we are authorised to access this tenant
 		private async static Task<bool> GetAuthorisedRequest(string tenantId, string uri = "")
 		{
@@ -995,6 +992,5 @@ namespace FFPP.Common
 
 			return false;
 		}
-        #endregion
     }
 }

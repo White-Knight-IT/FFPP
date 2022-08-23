@@ -86,6 +86,7 @@
     <None Remove="bootstrap.json.old" />
     <None Remove="unique.entropy.bytes" />
     <None Remove="device.id.token" />
+    <None Remove="device.id.token" />
   </ItemGroup>
   <ItemGroup>
     <Content Remove="wwwroot\" />
@@ -99,6 +100,10 @@
     <Content Remove="encrypted.secrets.json" />
     <Content Remove="bootstrap.json" />
     <Content Remove="api.zeroconf.json" />
+    <Content Remove="bootstrap.json" />
+    <Content Remove="bootstrap.json" />
+    <Content Remove="bootstrap.json" />
+    <Content Remove="bootstrap.json" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" />

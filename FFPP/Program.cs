@@ -57,19 +57,18 @@ ApiEnvironment.DeviceTag = await ApiEnvironment.GetDeviceTag();
 string kestrelHttps = builder.Configuration.GetValue<string>("Kestrel:Endpoints:Https:Url") ?? "https://localhost:7074";
 string kestrelHttp = builder.Configuration.GetValue<string>("Kestrel:Endpoints:Http:Url") ?? "https://localhost:7073";
 
-// These bytes form the basis of persistent but importantly unique seed entropy throughout crypto functions in this API
-await ApiEnvironment.GetEntropyBytes();
-
 // Build Data/Cache directories if they don't exist
 ApiEnvironment.DataAndCacheDirectoriesBuild();
 
 // Update DB if new manifest or create if not exist
 await ApiEnvironment.UpdateDbContexts();
 
+// These bytes form the basis of persistent but importantly unique seed entropy throughout crypto functions in this API
+await ApiEnvironment.GetEntropyBytes();
+
 // We will import our ApiZeroConf settings else try find bootstrap app to build from
 while (!ApiZeroConfiguration.ImportApiZeroConf(ref builder))
 {
-    Console.WriteLine($"Waiting for bootstrap.json to be placed at {ApiEnvironment.PersistentDir} to provision the API...");
     Thread.CurrentThread.Join(10000);
 }
 
