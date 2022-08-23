@@ -1,4 +1,0 @@
-CREATE DATABASE ffpp;
-CREATE USER 'ffppapiservice'@'localhost' IDENTIFIED BY 'wellknownpassword';
-GRANT ALL ON ffpp.* TO 'ffppapiservice'@'localhost';
-FLUSH PRIVILEGES;

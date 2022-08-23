@@ -1,3 +1,0 @@
-dotnet ef database update --context FfppLogsDbContext
-dotnet ef database update --context ExcludedTenantsDbContext
-dotnet ef database update --context UserProfilesDbContext
