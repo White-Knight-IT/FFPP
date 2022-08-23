@@ -121,8 +121,8 @@ namespace FFPP.Common
                         .AddSystemDriveSerialNumber()
                         .AddPlatformSerialNumber()).ToString()));
 
-                // key strech the device id using 273028 HMACSHA512 iterations
-                for (int i=0; i<273028; i++)
+                // key strech the device id using 173028 HMACSHA512 iterations
+                for (int i=0; i<173028; i++)
                 {
                     hashyBytes = HMACSHA512.HashData(hmacSalt, hashyBytes);
                 }
