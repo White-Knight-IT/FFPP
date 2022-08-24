@@ -17,6 +17,12 @@ async function Refresh()
 
   document.getElementById('tenantsDropdownButton').disabled=false;
 
+  if(!IsSetup().isSetup)
+  {
+    console.warn("API is not setup, redirecting to complete bootstrap process..");
+    LoadUrl('/setup/initial');
+  }
+
 }
 
 async function TenantRefresh()

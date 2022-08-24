@@ -4,7 +4,8 @@
     "FFPP": {
       "commandName": "Project",
       "launchBrowser": true,
-      "applicationUrl": "http://localhost:28286",
+      "launchUrl": "swagger",
+      "applicationUrl": "https://localhost:7074;http://localhost:7073",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }

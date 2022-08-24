@@ -54,3 +54,16 @@ async function GetTenants(allTenantSelector = false)
   }
 
 }
+
+async function IsSetup()
+{
+  try
+  {
+    return await FetchUrl(`/bootstrap/IsSetup`, { method: 'GET' });
+  }
+  catch(error)
+  {
+    console.error(error);
+  }
+
+}

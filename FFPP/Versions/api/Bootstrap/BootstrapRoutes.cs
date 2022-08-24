@@ -11,9 +11,9 @@ namespace FFPP.Api.Bootstrap
         public static void InitRoutes(ref WebApplication app)
         {
             /// <summary>
-            /// /api/bootstrap/IsSetup
+            /// /bootstrap/IsSetup
             /// </summary>
-            app.MapGet("/api/bootstrap/IsSetup", async (HttpContext context, HttpRequest request) =>
+            app.MapGet("/bootstrap/IsSetup", async (HttpContext context, HttpRequest request) =>
             {
                 Task<IsSetupResponse> checkCreds = new(() =>
                 {
@@ -23,12 +23,12 @@ namespace FFPP.Api.Bootstrap
                 checkCreds.Start();
                 return await checkCreds;
 
-            }).WithName("/api/bootstrap/IsSetup").ExcludeFromDescription();
+            }).WithName("/bootstrap/IsSetup").ExcludeFromDescription();
 
             /// <summary>
-            /// /api/bootstrap/IsSetup
+            /// /bootstrap/GraphToken
             /// </summary>
-            app.MapGet("/api/bootstrap/GetAADPSCode", async (HttpContext context, HttpRequest request) =>
+            app.MapGet("/bootstrap/GetGraphToken", async (HttpContext context, HttpRequest request) =>
             {
                 Task<bool> checkCreds = new(() =>
                 {
@@ -38,7 +38,7 @@ namespace FFPP.Api.Bootstrap
                 checkCreds.Start();
                 return await checkCreds;
 
-            }).WithName("/api/bootstrap/GetAADPSCode").ExcludeFromDescription();
+            }).WithName("/bootstrap/GetGraphToken").ExcludeFromDescription();
         }
 
         public struct IsSetupResponse
