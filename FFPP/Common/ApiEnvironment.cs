@@ -42,7 +42,6 @@ namespace FFPP.Common
         public static readonly string CachedTenantsFile = $"{CacheDir}/tenants.cache.json";
         public static readonly string LicenseConversionTableFile = $"{DataDir}/ConversionTable.csv";
         public static readonly string LicenseConversionTableMisfitsFile = $"{DataDir}/ConversionTableMisfits.csv";
-        public static readonly string ZeroConfPath = $"{PersistentDir}/api.zeroconf.json";
         public static readonly string ApiVersionFile = $"{WorkingDir}/version_latest.txt";
         public static readonly string UniqueEntropyBytesPath = $"{PersistentDir}/unique.entropy.bytes";
         public static string WebRootPath = $"{WorkingDir}/wwwroot";
