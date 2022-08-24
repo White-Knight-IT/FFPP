@@ -12,7 +12,6 @@ namespace FFPP.Api.v11
 
         public static void InitRoutes(ref WebApplication app)
         {
-            #region API Routes
             /// <summary>
             /// /v1.1/CurrentRouteVersion
             /// </summary>
@@ -21,7 +20,6 @@ namespace FFPP.Api.v11
                 return CurrentRouteVersion();
 
             }).WithTags(_tags).WithName(string.Format("/{0}/CurrentRouteVersion", _versionHeader)).WithApiVersionSet(ApiEnvironment.ApiVersionSet).MapToApiVersion(ApiEnvironment.ApiV11);
-            #endregion
         }
 
         public static CurrentApiRoute CurrentRouteVersion()

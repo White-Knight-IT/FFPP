@@ -227,7 +227,7 @@ if (ApiEnvironment.RunSwagger)
             foreach (var desc in app.DescribeApiVersions())
             {
                 var url = $"/swagger/{desc.GroupName}/swagger.json";
-                var name = desc.GroupName.ToUpperInvariant();
+                var name = desc.GroupName.ToUpper();
                 if (desc.ApiVersion.ToString().Contains(ApiEnvironment.ApiDev.ToString()))
                 {
                     customSwagger.SwaggerEndpoint(url, $"FFPP API DEV {name}");

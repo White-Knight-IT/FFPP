@@ -168,10 +168,10 @@ namespace FFPP.Common
             string entropyBytesPath = $"{PersistentDir}/unique.entropy.bytes";
             if (!File.Exists(entropyBytesPath))
             {
-                await File.WriteAllBytesAsync(entropyBytesPath, UTF8Encoding.UTF8.GetBytes(Utilities.RandomByteString()));
+                await File.WriteAllTextAsync(entropyBytesPath, await Utilities.RandomByteString());
             }
 
-            return await File.ReadAllBytesAsync(entropyBytesPath);
+            return await Utilities.Base64Decode(await File.ReadAllTextAsync(entropyBytesPath));
         }
 
         public static async Task<bool> CheckForBootstrap()
@@ -186,7 +186,7 @@ namespace FFPP.Common
                 ApiEnvironment.Secrets.TenantId = result.GetProperty("TenantId").GetString();
                 ApiEnvironment.Secrets.ApplicationId = result.GetProperty("ApplicationId").GetString();
                 ApiEnvironment.Secrets.ApplicationSecret = result.GetProperty("ApplicationSecret").GetString();
-                await File.WriteAllTextAsync(bootstrapPath, Utilities.RandomByteString(1024));
+                await File.WriteAllTextAsync(bootstrapPath, await Utilities.RandomByteString());
                 File.Delete(bootstrapPath);
                 await ApiZeroConfiguration.Setup(ApiEnvironment.Secrets.TenantId);
 

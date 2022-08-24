@@ -578,7 +578,7 @@ namespace FFPP.Api.v10.Users
 
         public static async Task<string> GetUserPhoto(string userId, UserPhotoSize userPhotoSize, string tenantFilter)
         {
-            return Utilities.Base64Encode(await RequestHelper.NewGraphGetRequestBytes(string.Format("https://graph.microsoft.com/v1.0/users/{0}/photos/{1}x{1}/$value", userId, ((uint)userPhotoSize).ToString()), tenantFilter, contentHeader: "image/jpg"));
+            return await Utilities.Base64Encode(await RequestHelper.NewGraphGetRequestBytes(string.Format("https://graph.microsoft.com/v1.0/users/{0}/photos/{1}x{1}/$value", userId, ((uint)userPhotoSize).ToString()), tenantFilter, contentHeader: "image/jpg"));
         }
 
         public struct UserDevice

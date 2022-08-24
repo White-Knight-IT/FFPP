@@ -33,14 +33,13 @@ namespace FFPP.Common
         };
 
         /// <summary>
-        /// Returns a unicode string consisting of 4098 crypto random bytes (4kb), this is cryptosafe random
+        /// Returns a base64 encoded string consisting of 4098 crypto random bytes (4kb), this is cryptosafe random
         /// </summary>
         /// <param name="length">Length of characters you want returned, defaults to 4098 (4kb)</param>
-        /// <returns>4kb string of random unicode chars</returns>
-        public static string RandomByteString(int length = 4098)
+        /// <returns>4kb string of random bytes encoded as base64 string</returns>
+        public static async Task<string> RandomByteString(int length = 4098)
         {
-            byte[] randomFillerBytes = RandomNumberGenerator.GetBytes(length);
-            return Encoding.Unicode.GetString(randomFillerBytes);
+             return await Base64Encode(RandomNumberGenerator.GetBytes(length));
         }
 
         /// <summary>
@@ -205,9 +204,16 @@ namespace FFPP.Common
         /// </summary>
         /// <param name="bytes">bytes to encode</param>
         /// <returns>Base64 encoded string</returns>
-        public static string Base64Encode(byte[] bytes)
+        public static async Task<string> Base64Encode(byte[] bytes)
         {
-            return Convert.ToBase64String(bytes);
+            Task<string> task = new(() =>
+            {
+                return Convert.ToBase64String(bytes);
+            });
+
+            task.Start();
+
+            return await task;
         }
 
         /// <summary>
@@ -215,9 +221,17 @@ namespace FFPP.Common
         /// </summary>
         /// <param name="text"></param>
         /// <returns>byte array containing bytes of string</returns>
-        public static byte[] Base64Decode(string text)
+        public static async Task<byte[]> Base64Decode(string text)
         {
-            return Convert.FromBase64String(text);
+            Task<byte[]> task = new(() =>
+            {
+                return Convert.FromBase64String(text);
+
+            });
+
+            task.Start();
+
+            return await task;
         }
 
         public static async Task<string> UsernameParse(HttpContext context)
@@ -347,7 +361,7 @@ namespace FFPP.Common
                     aes.Key = key;
 
                     // It is acceptable to use MD5 here as it outputs 16 bytes, it's fast, and IV is not secret
-                    aes.IV = MD5.HashData(UTF8Encoding.UTF8.GetBytes(RandomByteString(512)));
+                    aes.IV = MD5.HashData(await Utilities.Base64Decode(await RandomByteString(512)));
 
                     using (var encryptor = aes.CreateEncryptor(aes.Key, aes.IV))
                     using (var resultStream = new MemoryStream())
@@ -363,7 +377,7 @@ namespace FFPP.Common
                         Array.ConstrainedCopy(aes.IV, 0, combined, 0, aes.IV.Length);
                         Array.ConstrainedCopy(result, 0, combined, aes.IV.Length, result.Length);
 
-                        return Base64Encode(combined);
+                        return await Base64Encode(combined);
                     }
                 }
             }
@@ -387,7 +401,7 @@ namespace FFPP.Common
                     throw new ArgumentException("AES key must be 16, 24 or 32 bytes in length");
                 }
 
-                var combined = Base64Decode(cipherText);
+                var combined = await Base64Decode(cipherText);
                 var cipherTextBuffer = new byte[combined.Length];
 
                 using (var aes = Aes.Create())
