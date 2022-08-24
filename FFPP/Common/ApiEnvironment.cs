@@ -5,15 +5,12 @@ using System.Security.Cryptography;
 using Asp.Versioning;
 using Asp.Versioning.Builder;
 using Microsoft.EntityFrameworkCore;
-using DeviceId;
 using FFPP.Data;
 using FFPP.Data.Logging;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using System.IO;
 using System.IO.Pipes;
 using FFPP.Api.v10.Tenants;
-using static FFPP.Data.ExcludedTenantsDbContext;
-using static FFPP.Data.UserProfilesDbContext;
 
 namespace FFPP.Common
 {
@@ -43,7 +40,6 @@ namespace FFPP.Common
         public static readonly string LicenseConversionTableFile = $"{DataDir}/ConversionTable.csv";
         public static readonly string LicenseConversionTableMisfitsFile = $"{DataDir}/ConversionTableMisfits.csv";
         public static readonly string ApiVersionFile = $"{WorkingDir}/version_latest.txt";
-        public static readonly string UniqueEntropyBytesPath = $"{PersistentDir}/unique.entropy.bytes";
         public static string WebRootPath = $"{WorkingDir}/wwwroot";
         public static readonly string ApiBinaryVersion = File.ReadAllText(ApiVersionFile);
         public static readonly string ApiHeader = "api";
@@ -69,7 +65,6 @@ namespace FFPP.Common
         public static bool RunSwagger = false;
         public static bool ServeStaticFiles = false;
         public static bool UseHttpsRedirect = true;
-        public static byte[]? EntropyBytes;
         public static bool HasCredentials = false;
         public static string? DeviceTag = string.Empty;
 
@@ -96,34 +91,21 @@ namespace FFPP.Common
         }
 
         /// <summary>
-        /// Gets a unique Device ID from a combination of hardware identifiers and a stored GUID
-        /// (GUID ensures uniqued ID per host on shared hardware)
+        /// Gets a unique 32 byte Device ID
         /// </summary>
         /// <returns>DeviceId as byte[32] array</returns>
         public static async Task<byte[]> GetDeviceId()
         {
-            byte[] hmacSalt = ApiEnvironment.EntropyBytes ?? UTF8Encoding.UTF8.GetBytes(await GetDeviceIdTokenSeed());
+            byte[] hmacSalt = UTF8Encoding.UTF8.GetBytes($"ffppDevId{await GetDeviceIdTokenSeed()}seedBytes");
 
             try
             {
-                byte[] hashyBytes = HMACSHA512.HashData(hmacSalt,UTF8Encoding.UTF8.GetBytes(new DeviceIdBuilder()
-                    .AddFileToken($"{PersistentDir}/device.id.token") // Random entropy makes DeviceId unobtainable by someone without device access
-                    .OnWindows(windows => windows
-                        .AddProcessorId()
-                        .AddMotherboardSerialNumber()
-                        .AddSystemDriveSerialNumber())
-                    .OnLinux(linux => linux
-                        .AddCpuInfo()
-                        .AddMotherboardSerialNumber()
-                        .AddSystemDriveSerialNumber())
-                    .OnMac(mac => mac
-                        .AddSystemDriveSerialNumber()
-                        .AddPlatformSerialNumber()).ToString()));
+                byte[] hashyBytes = HMACSHA512.HashData(hmacSalt, await GetEntropyBytes());
 
                 // key strech the device id using 173028 HMACSHA512 iterations
                 for (int i=0; i<173028; i++)
                 {
-                    hashyBytes = HMACSHA512.HashData(hmacSalt, hashyBytes);
+                    hashyBytes = HMACSHA512.HashData(hmacSalt,hashyBytes);
                 }
 
                 // Final hash reduces bytes to byte[32] array perfect for use as AES256 key
@@ -186,14 +168,13 @@ namespace FFPP.Common
 
         public static async Task<byte[]> GetEntropyBytes()
         {
-            if (!File.Exists(UniqueEntropyBytesPath))
+            string entropyBytesPath = $"{PersistentDir}/unique.entropy.bytes";
+            if (!File.Exists(entropyBytesPath))
             {
-                await File.WriteAllBytesAsync(UniqueEntropyBytesPath, UTF8Encoding.UTF8.GetBytes(Utilities.RandomByteString()));
+                await File.WriteAllBytesAsync(entropyBytesPath, UTF8Encoding.UTF8.GetBytes(Utilities.RandomByteString()));
             }
 
-            ApiEnvironment.EntropyBytes = await File.ReadAllBytesAsync(UniqueEntropyBytesPath);
-
-            return ApiEnvironment.EntropyBytes;
+            return await File.ReadAllBytesAsync(entropyBytesPath);
         }
 
         public static async Task<bool> CheckForBootstrap()
