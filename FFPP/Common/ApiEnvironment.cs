@@ -25,18 +25,15 @@ namespace FFPP.Common
         public static readonly string RoleAdmin = "admin";
         public static readonly string RoleEditor = "editor";
         public static readonly string RoleReader = "reader";
-#if DEBUG
-        public static readonly bool IsDebug = true;
-#else
-        public static readonly bool IsDebug = false;
-#endif
+        #if DEBUG
+            public static readonly bool IsDebug = true;
+        #else
+            public static readonly bool IsDebug = false;
+        #endif
         public static readonly string WorkingDir = Directory.GetCurrentDirectory();
         public static readonly string DataDir = $"{WorkingDir}/Data";
         public static string CacheDir = $"{DataDir}/Cache";
-        public static string PersistentDir = "./";
-        public static readonly string PreFetchDir = $"{CacheDir}/Pre-Fetch";
-        public static readonly string UsersPreFetchDir = $"{PreFetchDir}/Users";
-        public static readonly string CachedTenantsFile = $"{CacheDir}/tenants.cache.json";
+        public static string PersistentDir = ".";
         public static readonly string LicenseConversionTableFile = $"{DataDir}/ConversionTable.csv";
         public static readonly string LicenseConversionTableMisfitsFile = $"{DataDir}/ConversionTableMisfits.csv";
         public static readonly string ApiVersionFile = $"{WorkingDir}/version_latest.txt";
@@ -73,7 +70,7 @@ namespace FFPP.Common
         /// </summary>
         public static void DataAndCacheDirectoriesBuild()
         {
-            Directory.CreateDirectory(UsersPreFetchDir);
+            Directory.CreateDirectory(CacheDir);
             Directory.CreateDirectory(DataDir);
             Directory.CreateDirectory(PersistentDir);
             Console.WriteLine($"Cache Directory: {CacheDir}");

@@ -48,7 +48,7 @@ namespace FFPP.Api.v10.Tenants
             List<Tenant> allTenants = new();
 			List<Tenant> outTenants = new();
 
-			FileInfo cacheFile = new(ApiEnvironment.CachedTenantsFile);
+			FileInfo cacheFile = new($"{ApiEnvironment.CacheDir}/tenants.cache.json");
 			string uri = "https://graph.microsoft.com/beta/contracts?$select=customerId,defaultDomainName,displayName&$top=999";
 			
 			void CheckExclusions(List<Tenant> tenantArray, ref List<Tenant> listTenants, ref List<Tenant> allTenants)
