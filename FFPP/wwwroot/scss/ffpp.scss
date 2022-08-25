@@ -3,9 +3,8 @@
 $ffpp-bg-deep-dark: $black;
 $ffpp-bg-dark: #303030;
 $ffpp-bg-hover-dark: #525252;
-$ffpp-highlight-dark: #ffd017;
+$ffpp-highlight-dark: #ffc107;
 $ffpp-highlight-alt-dark: #b371ff;
-$ffp-highlight-3char-dark: #fc0;
 $ffpp-bg-sidebar-dark: #212121;
 $ffpp-bg-modal-dark: #141414;
 $ffpp-color-dark: #ffffff;
@@ -84,7 +83,7 @@ font-size: 12px;
     }
     
     &.accordion-button:not(.collapsed)::after {
-        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23fc0'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23fb0'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
         transform: rotate(-180deg)
     }
 
@@ -233,6 +232,14 @@ font-size: 12px;
     &:disabled
     {
         color: $ffpp-disabled;
+    }
+}
+
+.a-general-dark {
+    text-decoration: underline;
+    color: $ffpp-highlight-dark !important;
+    &:hover {
+        color: $ffpp-highlight-alt-dark !important;
     }
 }
 

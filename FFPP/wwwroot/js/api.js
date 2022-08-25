@@ -1,13 +1,22 @@
-async function FetchUrl(url, requestOptions)
+async function FetchUrl(url, requestOptions, signIn=true)
 {
   async function RepeatableFetch(url, requestOptions, contentType='application/json')
   {
-    var signInData = await SignIn();
-    requestOptions.credentials = 'include';
-    requestOptions.headers= {
-      'Authorization': 'Bearer '+signInData.accessToken,
-      'Content-Type': contentType
-    };
+    if(signIn)
+    {
+      var signInData = await SignIn();
+      requestOptions.credentials = 'include';
+      requestOptions.headers= {
+        'Authorization': 'Bearer '+signInData.accessToken,
+        'Content-Type': contentType
+      };
+    }
+    else
+    {
+      requestOptions.headers= {
+        'Content-Type': contentType
+      };
+    }
     let responsePayload = await fetch(url, requestOptions);
     return await responsePayload.json();
   }
@@ -15,9 +24,10 @@ async function FetchUrl(url, requestOptions)
   try {
       return await RepeatableFetch(url, requestOptions);
   }
-  catch (e)
+  catch (error)
   {
-      return await RepeatableFetch(url, requestOptions);
+    console.error(`Error with url ${url} - ${error} - Retrying`)
+    return await RepeatableFetch(url, requestOptions);
   }
 }
 
@@ -55,15 +65,27 @@ async function GetTenants(allTenantSelector = false)
 
 }
 
-async function IsSetup()
+async function TokenStatus()
 {
   try
   {
-    return await FetchUrl(`/bootstrap/IsSetup`, { method: 'GET' });
+    return await FetchUrl(`/bootstrap/TokenStatus`, { method: 'GET' }, false);
   }
   catch(error)
   {
     console.error(error);
   }
 
+}
+
+async function GraphTokenUrl()
+{
+  try
+  {
+    return await FetchUrl(`/bootstrap/GetGraphTokenUrl`, { method: 'GET' }, false);
+  }
+  catch(error)
+  {
+    console.error(error);
+  }
 }

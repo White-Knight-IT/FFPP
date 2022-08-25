@@ -4,6 +4,14 @@ window.addEventListener('popstate', function (event) {
 
 async function Refresh()
 {
+  var tokenStatus = await TokenStatus();
+
+  if(!tokenStatus.refreshToken || !tokenStatus.exchangeRefreshToken)
+  {
+    console.warn("Tokens are not setup, redirecting to complete bootstrap process..");
+    CallToAction('/setup/initial');
+  }
+
   if(null==tokenGlobal)
   {
     await SignIn();
@@ -16,12 +24,47 @@ async function Refresh()
 	]);
 
   document.getElementById('tenantsDropdownButton').disabled=false;
+}
 
-  if(!IsSetup().isSetup)
+async function BootstrapRefresh()
+{
+  var graphUrl = await GraphTokenUrl();
+  if(null != graphUrl.url && graphUrl.url != 'undefined')
   {
-    console.warn("API is not setup, redirecting to complete bootstrap process..");
-    LoadUrl('/setup/initial');
+    document.getElementById("tokenLink").href=graphUrl.url;
   }
+  BootstrapTokenCheck();
+  setInterval(BootstrapTokenCheck, 1337);
+}
+
+async function BootstrapTokenCheck()
+{
+  var tokenStatus = await TokenStatus();
+
+  if (tokenStatus.refreshToken) {
+    document.getElementById("grtIcon").classList.remove("bi-slash-square");
+    document.getElementById("grtIcon").classList.add("bi-check-square");
+    document.getElementById("grtContainer").classList.remove("bg-secondary");
+    document.getElementById("grtContainer").classList.add("bg-success");
+    if(document.getElementById("instructions").innerHTML != '<div class="spinner-border text-warning" role="status"><span class="visually-hidden">Loading...</span></div>')
+    {
+      document.getElementById("instructions").innerHTML='<div class="spinner-border text-warning" role="status"><span class="visually-hidden">Loading...</span></div>';
+    }
+
+  }
+
+  if (tokenStatus.exchangeRefreshToken) {
+    document.getElementById("ertIcon").classList.remove("bi-slash-square");
+    document.getElementById("ertIcon").classList.add("bi-check-square");
+    document.getElementById("ertContainer").classList.remove("bg-secondary");
+    document.getElementById("ertContainer").classList.add("bg-success");
+  }
+
+  if(tokenStatus.refreshToken && tokenStatus.exchangeRefreshToken)
+  {
+    window.location="/";
+  }
+
 
 }
 
@@ -165,10 +208,19 @@ async function LoadUrl(url)
   const nextTitle = 'FFTP - NEXT';
   const nextState = { additionalInformation: 'Updated the URL with JS' };
   window.history.pushState(nextState, nextTitle, url);
-  CallToAction()
+  CallToAction(url)
 }
 
-async function CallToAction()
+async function CallToAction(currentUrl)
 {
-
+  switch(currentUrl) {
+    case '/setup/initial' || '/setup/initial/':
+      window.location.replace('/setup/initial');
+      break;
+    case y:
+      // code block
+      break;
+    default:
+      // code block
+  }
 }

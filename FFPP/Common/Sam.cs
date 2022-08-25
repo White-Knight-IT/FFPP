@@ -783,17 +783,16 @@ namespace FFPP.Common
 							"https://login.microsoftonline.com/common/oauth2/nativeclient",
 							"https://localhost",
 							"http://localhost",
-							"https://localhost:8400",
-							"http://localhost:8400",
-							"https://localhost:7074",
-							"http://localhost:7073",
-							"https://localhost:7072",
-							"http://localhost:7071",
-							"urn:ietf:wg:oauth:2.0:oob",
-							ffppFrontEnd
-
-
-						},
+                            "http://localhost:7073",
+                            "https://localhost:7074",
+                            "https://localhost:7074/bootstrap/ReceiveGraphToken",
+                            "http://localhost:7073/bootstrap/ReceiveGraphToken",
+                            "urn:ietf:wg:oauth:2.0:oob",
+							ffppFrontEnd,
+                            $"{ffppFrontEnd}/bootstrap/ReceiveGraphToken",
+                            $"{ApiEnvironment.KestrelHttp}/bootstrap/ReceiveGraphToken",
+                            $"{ApiEnvironment.KestrelHttps}/bootstrap/ReceiveGraphToken"
+                        },
 						implicitGrantSettings = new()
 						{
 							enableAccessTokenIssuance = true,

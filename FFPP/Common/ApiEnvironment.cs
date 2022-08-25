@@ -62,8 +62,9 @@ namespace FFPP.Common
         public static bool RunSwagger = false;
         public static bool ServeStaticFiles = false;
         public static bool UseHttpsRedirect = true;
-        public static bool HasCredentials = false;
         public static string? DeviceTag = string.Empty;
+        public static string KestrelHttp = "https://localhost:7073";
+        public static string KestrelHttps = "https://localhost:7074";
 
         /// <summary>
         /// Build data directories including cache directories if they don't exist
@@ -163,6 +164,10 @@ namespace FFPP.Common
             return false;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public static async Task<byte[]> GetEntropyBytes()
         {
             string entropyBytesPath = $"{PersistentDir}/unique.entropy.bytes";
@@ -174,6 +179,10 @@ namespace FFPP.Common
             return await Utilities.Base64Decode(await File.ReadAllTextAsync(entropyBytesPath));
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public static async Task<bool> CheckForBootstrap()
         {
             string bootstrapPath = $"{PersistentDir}/bootstrap.json";
@@ -196,6 +205,10 @@ namespace FFPP.Common
             return false;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public static async Task<string> GetDeviceTag()
         {
             return (await ApiEnvironment.GetDeviceIdTokenSeed())[^6..];
@@ -229,9 +242,6 @@ namespace FFPP.Common
             }
         }
 
-        /// <summary>
-        /// Used to define a Version structure for use in the api
-        /// </summary>
         public struct FfppVersion
         {
             public FfppVersion(string rawVersion)
@@ -244,6 +254,28 @@ namespace FFPP.Common
             public string RawVersion { get; set; }
             public Version Version { get; set; }
             public string DisplayVersion { get; set; }
+        }
+
+        public struct ApiTokenStatus
+        {
+            public ApiTokenStatus()
+            {
+                refreshToken = false;
+                exchangeRefreshToken = false;
+
+                if (!string.IsNullOrEmpty(Secrets.RefreshToken))
+                {
+                       refreshToken = true;
+                }
+
+                if (!string.IsNullOrEmpty(Secrets.ExchangeRefreshToken))
+                {
+                    exchangeRefreshToken = true;
+                }
+            }
+
+            public bool refreshToken { get; set; }
+            public bool exchangeRefreshToken { get; set; }
         }
 
         /// <summary>

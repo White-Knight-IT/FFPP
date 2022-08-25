@@ -3,10 +3,6 @@ using System.Web;
 using System.Text.Json;
 using FFPP.Api.v10.Tenants;
 using FFPP.Data.Logging;
-using Microsoft.Graph;
-using static System.Net.WebRequestMethods;
-using System.Net.NetworkInformation;
-using System;
 
 namespace FFPP.Common
 {
@@ -857,7 +853,7 @@ namespace FFPP.Common
 			else
 			{
 				requestMessage = new(HttpMethod.Post, uri);
-				requestMessage.Content = new StringContent(string.Format("client_id={0}&scope={1}+offline_access+profile+openid&grant_type=device_code&device_code={2}", clientId, encodedscope, device_code));
+				requestMessage.Content = new StringContent($"client_id={clientId}&scope={encodedscope}+offline_access+profile+openid&grant_type=device_code&device_code={device_code}");
 				requestMessage.Content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
 
 				responseMessage = await SendHttpRequest(requestMessage);

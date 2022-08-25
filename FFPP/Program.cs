@@ -52,10 +52,10 @@ ApiEnvironment.MysqlServerPort = builder.Configuration.GetValue<string>("ApiSett
 ApiEnvironment.CacheDir = builder.Configuration.GetValue<string>("ApiSettings:CachePath") ?? $"{ApiEnvironment.DataDir}/Cache";
 ApiEnvironment.PersistentDir = builder.Configuration.GetValue<string>("ApiSettings:PersistentPath") ?? ApiEnvironment.WorkingDir;
 ApiEnvironment.WebRootPath = builder.Configuration.GetValue<string>("ApiSettings:WebRootPath") ?? $"{ApiEnvironment.WorkingDir}/wwwroot";
-ApiEnvironment.FfppFrontEndUri = builder.Configuration.GetValue<string>("ApiSettings:WebUiUrl") ?? "http://localhost";
+ApiEnvironment.FfppFrontEndUri = builder.Configuration.GetValue<string>("ApiSettings:WebUiUrl").TrimEnd('/') ?? "http://localhost";
 ApiEnvironment.DeviceTag = await ApiEnvironment.GetDeviceTag();
-string kestrelHttps = builder.Configuration.GetValue<string>("Kestrel:Endpoints:Https:Url") ?? "https://localhost:7074";
-string kestrelHttp = builder.Configuration.GetValue<string>("Kestrel:Endpoints:Http:Url") ?? "https://localhost:7073";
+ApiEnvironment.KestrelHttps = builder.Configuration.GetValue<string>("Kestrel:Endpoints:Https:Url") ?? "https://localhost:7074";
+ApiEnvironment.KestrelHttp = builder.Configuration.GetValue<string>("Kestrel:Endpoints:Http:Url") ?? "https://localhost:7073";
 
 // Build Data/Cache directories if they don't exist
 ApiEnvironment.DataAndCacheDirectoriesBuild();
@@ -76,7 +76,7 @@ while (!ApiZeroConfiguration.ImportApiZeroConf(ref builder))
 builder.Services.AddMicrosoftIdentityWebApiAuthentication(builder.Configuration, "ZeroConf:AzureAd");
 
 // CORS policy to allow the UI to access the API
-string[] corsUris = new string[]{ ApiEnvironment.FfppFrontEndUri, kestrelHttps, kestrelHttp } ?? new string[]{kestrelHttps,kestrelHttp};
+string[] corsUris = new string[]{ ApiEnvironment.FfppFrontEndUri, ApiEnvironment.KestrelHttps, ApiEnvironment.KestrelHttp } ?? new string[]{ ApiEnvironment.KestrelHttps, ApiEnvironment.KestrelHttp };
 
 builder.Services.AddCors(p => p.AddPolicy("corsapp", builder =>
 {
