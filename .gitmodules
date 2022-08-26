@@ -1,0 +1,3 @@
+[submodule "FFPP/wwwroot"]
+	path = FFPP/wwwroot
+	url = git@github.com:White-Knight-IT/FFPP-WWW.git

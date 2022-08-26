@@ -41,7 +41,6 @@
     <Folder Include="Data\" />
     <Folder Include="Migrations\" />
     <Folder Include="Data\Logging\" />
-    <Folder Include="wwwroot\" />
     <Folder Include="Common\" />
     <Folder Include="Versions\api\" />
     <Folder Include="Versions\api\v1.1\" />
@@ -84,9 +83,10 @@
     <None Remove="device.id.token" />
     <None Remove="unique.entropy.bytes" />
     <None Remove="device.id.token" />
+    <None Remove="unique.entropy.bytes" />
+    <None Remove="device.id.token" />
   </ItemGroup>
   <ItemGroup>
-    <Content Remove="wwwroot\" />
     <Content Remove="Data\Cache\tenants.cache.json" />
     <Content Remove="Data\plain.secrets.json" />
     <Content Remove="Data\api.zeroconf.json" />
