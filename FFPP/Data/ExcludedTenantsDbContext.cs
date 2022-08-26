@@ -86,6 +86,7 @@ namespace FFPP.Data
             }
             catch (Exception ex)
             {
+                ApiEnvironment.RunErrorCount++;
                 Console.WriteLine($"Exception writing  in ExcludedTenant: {ex.Message}");
                 throw ex;
             }

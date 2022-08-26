@@ -162,6 +162,8 @@ namespace FFPP.Common
             }
             catch (Exception ex)
             {
+                ApiEnvironment.RunErrorCount++;
+
                 FfppLogsDbThreadSafeCoordinator.ThreadSafeAdd(new FfppLogsDbContext.LogEntry()
                 {
                     Message = $"Exception purging FFPP API Cache: {ex.Message}",
@@ -351,6 +353,7 @@ namespace FFPP.Common
 
                 if(key.Length != 16 && key.Length != 24 && key.Length != 32)
                 {
+                    ApiEnvironment.RunErrorCount++;
                     throw new ArgumentException("AES key must be 16, 24 or 32 bytes in length");
                 }
 
@@ -398,6 +401,7 @@ namespace FFPP.Common
 
                 if (key.Length != 16 && key.Length != 24 && key.Length != 32)
                 {
+                    ApiEnvironment.RunErrorCount++;
                     throw new ArgumentException("AES key must be 16, 24 or 32 bytes in length");
                 }
 

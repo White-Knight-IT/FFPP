@@ -65,7 +65,8 @@ namespace FFPP.Common
         public static string? DeviceTag = string.Empty;
         public static string KestrelHttp = "https://localhost:7073";
         public static string KestrelHttps = "https://localhost:7074";
-
+        public static long RunErrorCount = 0;
+        public static bool IsBoostrapped = false;
         /// <summary>
         /// Build data directories including cache directories if they don't exist
         /// </summary>
@@ -111,6 +112,8 @@ namespace FFPP.Common
             }
             catch(Exception ex)
             {
+                ApiEnvironment.RunErrorCount++;
+
                 FfppLogsDbThreadSafeCoordinator.ThreadSafeAdd(new FfppLogsDbContext.LogEntry()
                 {
                     Message = $"Exception GetDeviceId: {ex.Message}",
@@ -230,6 +233,8 @@ namespace FFPP.Common
             }
             catch(Exception ex)
             {
+                ApiEnvironment.RunErrorCount++;
+
                 FfppLogsDbThreadSafeCoordinator.ThreadSafeAdd(new FfppLogsDbContext.LogEntry()
                 {
                     Message = $"Exception GetDeviceIdToken: {ex.Message}",

@@ -137,7 +137,6 @@ namespace FFPP.Api.v10.Users
             return users;
         }
 
-        #region Properties
         public object? AlternateEmailAddresses { get; set; }
         public object? AlternateMobilePhones { get; set; }
         public string? AlternativeSecurityIds { get; set; }
@@ -309,7 +308,5 @@ namespace FFPP.Api.v10.Users
         public ServiceElements? ServiceElements { get; set; }
         public string? ServiceInstance { get; set; }
     }
-    #endregion
-
 }
 

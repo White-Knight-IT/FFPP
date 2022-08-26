@@ -569,6 +569,8 @@ namespace FFPP.Api.v10.Users
             }
             catch(Exception ex)
             {
+                ApiEnvironment.RunErrorCount++;
+
                 FfppLogsDbContext.DebugConsoleWrite($"Exception in ListUserDevices: {ex.Message}");
                 throw;
             }

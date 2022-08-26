@@ -1,3 +1,5 @@
+var expiresCount = 830;
+
 window.addEventListener('popstate', function (event) {
 	CallToAction(window.location.href);
 });
@@ -24,6 +26,8 @@ async function Refresh()
 	]);
 
   document.getElementById('tenantsDropdownButton').disabled=false;
+
+  setInterval(Heartbeat, 120000);
 }
 
 async function BootstrapRefresh()
@@ -42,15 +46,21 @@ async function BootstrapTokenCheck()
   var tokenStatus = await TokenStatus();
 
   if (tokenStatus.refreshToken) {
-    document.getElementById("grtIcon").classList.remove("bi-slash-square");
-    document.getElementById("grtIcon").classList.add("bi-check-square");
-    document.getElementById("grtContainer").classList.remove("bg-secondary");
-    document.getElementById("grtContainer").classList.add("bg-success");
-    if(document.getElementById("instructions").innerHTML != '<div class="spinner-border text-warning" role="status"><span class="visually-hidden">Loading...</span></div>')
+    if(document.getElementById("grtIcon").classList.contains("bi-slash-square"))
     {
+      document.getElementById("grtIcon").classList.remove("bi-slash-square");
+      document.getElementById("grtIcon").classList.add("bi-check-square");
+      document.getElementById("grtContainer").classList.remove("bg-secondary");
+      document.getElementById("grtContainer").classList.add("bg-success");
       document.getElementById("instructions").innerHTML='<div class="spinner-border text-warning" role="status"><span class="visually-hidden">Loading...</span></div>';
+      var device = await ExchangeTokenUrlCode()
+      if(null != device.url && device.url != 'undefined')
+      {
+        document.getElementById("instructions").innerHTML=`Sign in <a id="tokenLink" target="_blank" href="${device.url}" class="a-general-dark">HERE</a> as your Global Admin using code <span id="deviceCode" class="alt-text-dark">${device.code}</span></h5>`
+        expiresCount= device.expires-30;
+        setInterval(ExpireCount, 1000);
+      }
     }
-
   }
 
   if (tokenStatus.exchangeRefreshToken) {
@@ -58,14 +68,42 @@ async function BootstrapTokenCheck()
     document.getElementById("ertIcon").classList.add("bi-check-square");
     document.getElementById("ertContainer").classList.remove("bg-secondary");
     document.getElementById("ertContainer").classList.add("bg-success");
+    document.getElementById("ertIcon").classList.remove("bi-x-square");
+    document.getElementById("ertContainer").classList.remove("bg-danger");
   }
 
   if(tokenStatus.refreshToken && tokenStatus.exchangeRefreshToken)
   {
+    document.getElementById("instructions").innerText="Completed";
+    document.getElementById("instructions").classList.add("text-success");
     window.location="/";
   }
+}
 
+async function ExpireCount()
+{
+  expiresCount=expiresCount-1;
+  console.warn(`Device Code expires in: ${expiresCount}`);
 
+  if (expiresCount<=120)
+  {
+    document.getElementById("expireCard").classList.remove("d-none");
+    if(expiresCount>0)
+    {
+      document.getElementById("expireCount").innerText=expiresCount;
+    }
+    else
+    {
+      document.getElementById("expireCount").innerText="Expired";
+      document.getElementById("expireCount").classList.remove("ms-2");
+      document.getElementById("expireHeading").innerHTML=document.getElementById("expireCount").outerHTML;
+      document.getElementById("instructionsCard").classList.add("d-none");
+      document.getElementById("ertIcon").classList.remove("bi-slash-square");
+      document.getElementById("ertIcon").classList.add("bi-x-square");
+      document.getElementById("ertContainer").classList.remove("bg-secondary");
+      document.getElementById("ertContainer").classList.add("bg-danger");
+    }
+  }
 }
 
 async function TenantRefresh()
@@ -94,11 +132,11 @@ async function ProfileRefresh()
   {
     try
     {
-      document.getElementById("profileDropdownButton").style.backgroundImage=`url(${GenerateAvatar(profile.clientPrincipal.name.split(' ')[0].charAt(0)+profile.clientPrincipal.name.split(' ')[1].charAt(0),'#000000','#ffd017')})`;
+      document.getElementById("profileDropdownButton").style.backgroundImage=`url(${GenerateAvatar(profile.clientPrincipal.name.split(' ')[0].charAt(0)+profile.clientPrincipal.name.split(' ')[1].charAt(0),'#000000','#ffc107')})`;
     }
     catch
     {
-      document.getElementById("profileDropdownButton").style.backgroundImage=`url(${GenerateAvatar(profile.clientPrincipal.name.charAt(0),'#000000','#ffd017')})`;
+      document.getElementById("profileDropdownButton").style.backgroundImage=`url(${GenerateAvatar(profile.clientPrincipal.name.charAt(0),'#000000','#ffc107')})`;
     }
     document.getElementById("profileDropdownButton").style.backgroundSize='100%';
   }
@@ -203,6 +241,13 @@ async function SidebarCollapse() {
   }
 }
 
+async function Heartbeat()
+{
+  var heartbeat = await GetHeartbeat();
+  console.info(`API Heartbeat: ${JSON.stringify(heartbeat)}`);
+
+}
+
 async function LoadUrl(url)
 {
   const nextTitle = 'FFTP - NEXT';
@@ -216,9 +261,6 @@ async function CallToAction(currentUrl)
   switch(currentUrl) {
     case '/setup/initial' || '/setup/initial/':
       window.location.replace('/setup/initial');
-      break;
-    case y:
-      // code block
       break;
     default:
       // code block

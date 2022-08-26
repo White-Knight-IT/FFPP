@@ -37,6 +37,7 @@ namespace FFPP.Data
                 }
                 catch (Exception ex)
                 {
+                    ApiEnvironment.RunErrorCount++;
                     Console.WriteLine($"Exception writing  in UserProfiles: {ex.Message}");
                     throw;
                 }
@@ -101,6 +102,8 @@ namespace FFPP.Data
             }
             catch(Exception ex)
             {
+                ApiEnvironment.RunErrorCount++;
+
                 FfppLogsDbThreadSafeCoordinator.ThreadSafeAdd(new FfppLogsDbContext.LogEntry()
                 {
                     Message = $"Error updating user profile for {userProfile.userId.ToString()} - {userProfile.name}: {ex.Message}",

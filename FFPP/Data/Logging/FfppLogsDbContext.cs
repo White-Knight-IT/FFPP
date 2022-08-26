@@ -117,6 +117,7 @@ namespace FFPP.Data.Logging
             }
             catch (Exception ex)
             {
+                ApiEnvironment.RunErrorCount++;
                 Console.WriteLine($"Exception writing log entry in FfppLogs: {ex.Message}");
             }
 

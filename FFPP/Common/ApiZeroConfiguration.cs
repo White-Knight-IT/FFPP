@@ -26,6 +26,7 @@ namespace FFPP.Common
         public string? AppPassword { get; set; }
         public string? RefreshToken{ get; set; }
         public string? ExchangeRefreshToken { get; set; }
+        public bool? IsBootstrapped { get; set; }
 
         public static async Task<bool> Setup(string ownerTenant="")
         {
@@ -118,6 +119,7 @@ const config = {{
                     ApiEnvironment.Secrets.ApplicationSecret = zero.AppPassword;
                     ApiEnvironment.Secrets.RefreshToken = zero.RefreshToken;
                     ApiEnvironment.Secrets.ExchangeRefreshToken = zero.ExchangeRefreshToken;
+                    ApiEnvironment.IsBoostrapped = zero.IsBootstrapped ?? false;
                     builder.Configuration["ZeroConf:AzureAd:TenantId"] = zero.TenantId;
                     builder.Configuration["ZeroConf:AzureAd:ClientId"] = zero.ClientId;
                     builder.Configuration["ZeroConf:AzureAd:Domain"] = zero.Domain;
@@ -137,6 +139,7 @@ const config = {{
             }
             catch(Exception ex)
             {
+                ApiEnvironment.RunErrorCount++;
                 Console.WriteLine($"Exception reading ApiZeroConfiguration file: {ex.Message}");
             }
 
@@ -165,10 +168,12 @@ const config = {{
                 ApiEnvironment.Secrets.ApplicationSecret = this.AppPassword;
                 ApiEnvironment.Secrets.RefreshToken = this.RefreshToken;
                 ApiEnvironment.Secrets.ExchangeRefreshToken = this.ExchangeRefreshToken;
+                ApiEnvironment.IsBoostrapped = this.IsBootstrapped ?? false;
                 return true;
             }
             catch(Exception ex)
             {
+                ApiEnvironment.RunErrorCount++;
                 Console.WriteLine($"Exception saving ApiZeroConfiguration file: {ex.Message}");
             }
 

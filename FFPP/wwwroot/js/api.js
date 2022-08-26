@@ -1,4 +1,4 @@
-async function FetchUrl(url, requestOptions, signIn=true)
+async function FetchUrl(url, requestOptions, signIn=true, repeatable=true)
 {
   async function RepeatableFetch(url, requestOptions, contentType='application/json')
   {
@@ -6,14 +6,14 @@ async function FetchUrl(url, requestOptions, signIn=true)
     {
       var signInData = await SignIn();
       requestOptions.credentials = 'include';
-      requestOptions.headers= {
+      requestOptions.headers = {
         'Authorization': 'Bearer '+signInData.accessToken,
         'Content-Type': contentType
       };
     }
     else
     {
-      requestOptions.headers= {
+      requestOptions.headers = {
         'Content-Type': contentType
       };
     }
@@ -21,26 +21,45 @@ async function FetchUrl(url, requestOptions, signIn=true)
     return await responsePayload.json();
   }
 
-  try {
-      return await RepeatableFetch(url, requestOptions);
+  try 
+  {
+    return await RepeatableFetch(url, requestOptions);
   }
   catch (error)
   {
-    console.error(`Error with url ${url} - ${error} - Retrying`)
-    return await RepeatableFetch(url, requestOptions);
+    if(repeatable)
+    {
+      console.error(`Error with url ${url} - ${error} - Retrying`)
+      try
+      {
+        return await RepeatableFetch(url, requestOptions);
+      }
+      catch(error)
+      {
+        console.error(`Error with url ${url} - ${error} - Retry attempt failed, giving up`)
+      }
+    }
+    else
+    {
+      console.error(`Error with url ${url} - ${error} - NOT Retrying`)
+    }
   }
 }
 
 async function AuthMe() {
+  return await CallApi('/.auth/me', { method: 'GET' });
+}
+
+async function CallApi(url,method,signIn)
+{
   try
   {
-    return await FetchUrl('/.auth/me', { method: 'GET' });
+    return await FetchUrl(url,method,signIn)
   }
   catch(error)
   {
     console.error(error);
   }
-
 }
 
 async function EditProfile(userId,tenantName,tenantDomain, tenantId, tableSize)
@@ -49,43 +68,30 @@ async function EditProfile(userId,tenantName,tenantDomain, tenantId, tableSize)
     method: 'PUT',
     body: JSON.stringify({ userId: userId, lastTenantName: tenantName, lastTenantDomainName: tenantDomain, lastTenantCustomerId: tenantId, defaultPageSize: tableSize})
   };
-  return await FetchUrl(`/api/EditUserProfile`, requestOptions)
+  return await CallApi(`/api/EditUserProfile`, requestOptions)
+}
+
+async function ExchangeTokenUrlCode()
+{
+  return await CallApi(`/bootstrap/GetExchangeTokenUrlCode`, { method: 'GET' }, false);
 }
 
 async function GetTenants(allTenantSelector = false)
 {
-  try
-  {
-    return await FetchUrl(`/api/ListTenants?AllTenantSelector=${allTenantSelector}`, { method: 'GET' });
-  }
-  catch(error)
-  {
-    console.error(error);
-  }
-
-}
-
-async function TokenStatus()
-{
-  try
-  {
-    return await FetchUrl(`/bootstrap/TokenStatus`, { method: 'GET' }, false);
-  }
-  catch(error)
-  {
-    console.error(error);
-  }
-
+  return await CallApi(`/api/ListTenants?AllTenantSelector=${allTenantSelector}`, { method: 'GET' });
 }
 
 async function GraphTokenUrl()
 {
-  try
-  {
-    return await FetchUrl(`/bootstrap/GetGraphTokenUrl`, { method: 'GET' }, false);
-  }
-  catch(error)
-  {
-    console.error(error);
-  }
+  return await CallApi(`/bootstrap/GetGraphTokenUrl`, { method: 'GET' }, false);
+}
+
+async function GetHeartbeat()
+{
+  return await CallApi(`/api/Heartbeat`, { method: 'GET' });
+}
+
+async function TokenStatus()
+{
+  return await CallApi(`/bootstrap/TokenStatus`, { method: 'GET' }, false);
 }

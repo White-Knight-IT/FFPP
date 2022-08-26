@@ -105,6 +105,8 @@ namespace FFPP.Common
 					return new Dictionary<string, string> { ["Authorization"] = headers.GetValueOrDefault("access_token", string.Empty) };
 				}
 
+                ApiEnvironment.RunErrorCount++;
+
                 // Write to log an error that we didn't get HTTP 2XX
                 FfppLogsDbThreadSafeCoordinator.ThreadSafeAdd(new FfppLogsDbContext.LogEntry()
                 {
@@ -207,6 +209,7 @@ namespace FFPP.Common
 							}
 							else
 							{
+                                ApiEnvironment.RunErrorCount++;
                                 nextUrl = string.Empty;
                                 FfppLogsDbThreadSafeCoordinator.ThreadSafeAdd(new FfppLogsDbContext.LogEntry()
                                 {
@@ -223,7 +226,8 @@ namespace FFPP.Common
 					}
 					catch (Exception ex)
 					{
-						Console.WriteLine($"Exception in NewGraphGetRequest: {ex.Message}");
+                        ApiEnvironment.RunErrorCount++;
+                        Console.WriteLine($"Exception in NewGraphGetRequest: {ex.Message}");
 						nextUrl = string.Empty;
                         throw;
 					}
@@ -304,6 +308,8 @@ namespace FFPP.Common
 						}
 						else
 						{
+                            ApiEnvironment.RunErrorCount++;
+
                             FfppLogsDbThreadSafeCoordinator.ThreadSafeAdd(new FfppLogsDbContext.LogEntry()
                             {
                                 Message = $"Incorrect HTTP status code. Expected 2XX got {responseMessage.StatusCode.ToString()}, Uri: {uri}",
@@ -317,7 +323,9 @@ namespace FFPP.Common
 				}
 				catch (Exception ex)
 				{
-					Console.WriteLine($"Exception in NewGraphGetRequest: {ex.Message}");
+                    ApiEnvironment.RunErrorCount++;
+
+                    Console.WriteLine($"Exception in NewGraphGetRequest: {ex.Message}");
 					throw;
 				}
 			}
@@ -394,6 +402,8 @@ namespace FFPP.Common
 						}
 						else
 						{
+                            ApiEnvironment.RunErrorCount++;
+
                             FfppLogsDbThreadSafeCoordinator.ThreadSafeAdd(new FfppLogsDbContext.LogEntry()
                             {
                                 Message = $"Incorrect HTTP status code. Expected 2XX got {responseMessage.StatusCode.ToString()}. Uri: {uri}",
@@ -407,7 +417,9 @@ namespace FFPP.Common
 				}
 				catch (Exception ex)
 				{
-					Console.WriteLine($"Exception in NewGraphGetRequest: {ex.Message}");
+                    ApiEnvironment.RunErrorCount++;
+
+                    Console.WriteLine($"Exception in NewGraphGetRequest: {ex.Message}");
 					throw;
 				}
 			}
@@ -471,6 +483,8 @@ namespace FFPP.Common
 							return jsonDoc.RootElement;
 						}
 
+                        ApiEnvironment.RunErrorCount++;
+
                         FfppLogsDbThreadSafeCoordinator.ThreadSafeAdd(new FfppLogsDbContext.LogEntry()
                         {
                             Message = $"Incorrect HTTP status code.Expected 2XX got {responseMessage.StatusCode.ToString()}. Uri: {uri}",
@@ -483,7 +497,8 @@ namespace FFPP.Common
 				}
 				catch (Exception ex)
 				{
-					Console.WriteLine($"Exception in NewGraphPostRequest: {ex.Message}");
+                    ApiEnvironment.RunErrorCount++;
+                    Console.WriteLine($"Exception in NewGraphPostRequest: {ex.Message}");
 					throw;
 				}
 
@@ -525,6 +540,8 @@ namespace FFPP.Common
 				JsonDocument jsonDoc = await JsonDocument.ParseAsync(new MemoryStream(await responseMessage.Content.ReadAsByteArrayAsync()));
 				return jsonDoc.RootElement;
 			}
+
+            ApiEnvironment.RunErrorCount++;
 
             FfppLogsDbThreadSafeCoordinator.ThreadSafeAdd(new FfppLogsDbContext.LogEntry()
             {
@@ -617,6 +634,8 @@ namespace FFPP.Common
 							}
 							else
 							{
+                                ApiEnvironment.RunErrorCount++;
+
                                 FfppLogsDbThreadSafeCoordinator.ThreadSafeAdd(new FfppLogsDbContext.LogEntry()
                                 {
                                     Message = $"Incorrect HTTP status code. Expected 2XX got {responseMessage.StatusCode.ToString()}. Uri: {uri}",
@@ -632,7 +651,9 @@ namespace FFPP.Common
 					}
 					catch (Exception ex)
 					{
-						Console.WriteLine($"Exception in NewClassicAPIGetRequest: {ex.Message}");
+                        ApiEnvironment.RunErrorCount++;
+
+                        Console.WriteLine($"Exception in NewClassicAPIGetRequest: {ex.Message}");
 						throw;
 					}
 				}
@@ -707,6 +728,8 @@ namespace FFPP.Common
 						}
 						else
 						{
+                            ApiEnvironment.RunErrorCount++;
+
                             FfppLogsDbThreadSafeCoordinator.ThreadSafeAdd(new FfppLogsDbContext.LogEntry()
                             {
                                 Message = $"Incorrect HTTP status code. Expected 2XX got {responseMessage.StatusCode.ToString()}, Uri: {uri}",
@@ -720,7 +743,9 @@ namespace FFPP.Common
 				}
 				catch (Exception ex)
 				{
-					Console.WriteLine($"Exception in NewClassicApiPostRequest: {ex.Message}");
+                    ApiEnvironment.RunErrorCount++;
+
+                    Console.WriteLine($"Exception in NewClassicApiPostRequest: {ex.Message}");
 					throw;
 				}
 			}
@@ -775,6 +800,8 @@ namespace FFPP.Common
 						returnData = jsonDoc.RootElement.GetProperty("value");
 					}
 
+                    ApiEnvironment.RunErrorCount++;
+
                     FfppLogsDbThreadSafeCoordinator.ThreadSafeAdd(new FfppLogsDbContext.LogEntry()
                     {
                         Message = $"Incorrect HTTP status code. Expected 2XX got {responseMessage.StatusCode.ToString()}, Uri: {uri}",
@@ -786,7 +813,8 @@ namespace FFPP.Common
                 }
 				catch (Exception ex)
 				{
-					Console.WriteLine($"Exception in NewExoRequest: {ex.Message}");
+                    ApiEnvironment.RunErrorCount++;
+                    Console.WriteLine($"Exception in NewExoRequest: {ex.Message}");
 					throw;
 				}
 			}
@@ -840,6 +868,8 @@ namespace FFPP.Common
 
 				if (!responseMessage.IsSuccessStatusCode)
                 {
+                    ApiEnvironment.RunErrorCount++;
+
                     FfppLogsDbThreadSafeCoordinator.ThreadSafeAdd(new FfppLogsDbContext.LogEntry()
                     {
                         Message = $"Incorrect HTTP status code. Expected 2XX got {responseMessage.StatusCode.ToString()}, Uri: {uri}",

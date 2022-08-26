@@ -10964,6 +10964,10 @@ body {
   color: #888888;
 }
 
+.alt-text-dark {
+  color: #b371ff;
+}
+
 .a-general-dark {
   text-decoration: underline;
   color: #ffc107 !important;

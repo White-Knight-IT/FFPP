@@ -687,6 +687,8 @@ namespace FFPP.Api.v10
         public struct Heartbeat
         {
             public DateTime started { get => ApiEnvironment.Started; }
+            public long errorsSinceStarted { get => ApiEnvironment.RunErrorCount; }
+            public bool? isBootstrapped { get => ApiEnvironment.IsBoostrapped; }
         }
 
         /// <summary>
