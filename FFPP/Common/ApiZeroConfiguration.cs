@@ -49,8 +49,8 @@ namespace FFPP.Common
             string openIdClientId = samSpa.GetProperty("appId").GetString() ?? string.Empty;
             if (!openIdClientId.Equals(string.Empty))
             {
-                // Wait 15 seconds to ensure the SPA gets registered
-                await Task.Delay(15000);
+                // Wait 30 seconds to ensure the SPA gets registered
+                await Task.Delay(30000);
 
                 // step two - create SAM that will act as the authentication hub of the API
                 Sam.SamAndPassword result = await Sam.CreateSAMAuthApp($"FFPP API - {ApiEnvironment.DeviceTag}", Sam.SamAppType.Api, domain, openIdClientId, scopeGuid: apiScopeGuid);

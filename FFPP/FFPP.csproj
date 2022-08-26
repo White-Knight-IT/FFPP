@@ -101,6 +101,11 @@
     <Content Remove="bootstrap.json" />
     <Content Remove="bootstrap.json" />
     <Content Remove="bootstrap.json" />
+    <Content Remove="bootstrap.json" />
+    <Content Remove="bootstrap.json" />
+    <Content Remove="bootstrap.json" />
+    <Content Remove="bootstrap.json" />
+    <Content Remove="bootstrap.json" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" />
@@ -235,9 +240,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Update="wwwroot\setup\initial\index.html">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\home\index.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Update="wwwroot\css\all.min.css">

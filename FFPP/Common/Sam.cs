@@ -789,9 +789,9 @@ namespace FFPP.Common
                             "http://localhost:7073/bootstrap/ReceiveGraphToken",
                             "urn:ietf:wg:oauth:2.0:oob",
 							ffppFrontEnd,
-                            $"{ffppFrontEnd}/bootstrap/ReceiveGraphToken",
-                            $"{ApiEnvironment.KestrelHttp}/bootstrap/ReceiveGraphToken",
-                            $"{ApiEnvironment.KestrelHttps}/bootstrap/ReceiveGraphToken"
+                            $"{ffppFrontEnd}/bootstrap/receivegraphtoken",
+                            $"{ApiEnvironment.KestrelHttp}/bootstrap/receivegraphtoken",
+                            $"{ApiEnvironment.KestrelHttps}/bootstrap/receivegraphtoken"
                         },
 						implicitGrantSettings = new()
 						{
