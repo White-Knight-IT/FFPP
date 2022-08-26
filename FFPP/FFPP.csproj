@@ -106,6 +106,10 @@
     <Content Remove="bootstrap.json" />
     <Content Remove="bootstrap.json" />
     <Content Remove="bootstrap.json" />
+    <Content Remove="wwwroot\.git" />
+    <Content Remove="wwwroot\.gitignore" />
+    <Content Remove="wwwroot\LICENSE" />
+    <Content Remove="wwwroot\README.md" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" />
@@ -237,9 +241,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Update="wwwroot\swagger-customisation\swagger-customisation.css">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Update="wwwroot\setup\initial\index.html">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Update="wwwroot\css\all.min.css">
