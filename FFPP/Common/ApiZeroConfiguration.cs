@@ -80,8 +80,13 @@ namespace FFPP.Common
 
                     zeroConf.Save();
 
+                    if(File.Exists($"{ApiEnvironment.WebRootPath}/config.js"))
+                    {
+                        File.Delete($"{ApiEnvironment.WebRootPath}/config.js");
+                    }
+
                     // Setup our front end config file
-                    await File.WriteAllTextAsync(ApiEnvironment.WebRootPath + "/config.js",$@"/* Don't put secret configuration settings in this file, this is rendered
+                    await File.WriteAllTextAsync($"{ApiEnvironment.WebRootPath}/config.js",$@"/* Don't put secret configuration settings in this file, this is rendered
 by the client. */
 
 const config = {{

@@ -365,13 +365,6 @@ unique.entropy.bytes
 */Cache/*
 tenants.cache.json
 
-# Potentially sensitive configuration (not secrets)
-apizeroconf.json
-api.zeroconf.json
-api.zero.conf.json
-device.id.token
-*/device.id.token
-
 # Potential secrets
 */plain.secrets.json
 plain.secrets.json #pre-ingestion to encrypted state
@@ -379,6 +372,15 @@ plain.secrets.json #pre-ingestion to encrypted state
 encrypted.secrets.json
 bootstrap.json
 */bootstrap.json
+apizeroconf.json
+api.zeroconf.json
+api.zero.conf.json
+api.zeroconf
+*/api.zeroconf
+api.zeroconf.aes
+*/api.zeroconf.aes
+device.id.token
+*/device.id.token
 
 # macOS
 .DS_Store
