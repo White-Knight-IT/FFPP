@@ -148,7 +148,7 @@ const config = {{
 
         public static async Task<ApiZeroConfiguration?> Read()
         {
-            string apiZeroConfPath = $"{ApiEnvironment.PersistentDir}/api.zeroconf.json";
+            string apiZeroConfPath = $"{ApiEnvironment.PersistentDir}/api.zeroconf.aes";
 
             if (File.Exists(apiZeroConfPath))
             {
@@ -162,7 +162,7 @@ const config = {{
         {
             try
             {
-                Utilities.WriteJsonToFile<ApiZeroConfiguration>(this, $"{ApiEnvironment.PersistentDir}/api.zeroconf.json", true);
+                Utilities.WriteJsonToFile<ApiZeroConfiguration>(this, $"{ApiEnvironment.PersistentDir}/api.zeroconf.aes", true);
                 ApiEnvironment.Secrets.TenantId = this.TenantId;
                 ApiEnvironment.Secrets.ApplicationId = this.ClientId;
                 ApiEnvironment.Secrets.ApplicationSecret = this.AppPassword;
