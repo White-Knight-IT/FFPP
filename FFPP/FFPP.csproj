@@ -4094,6 +4094,14 @@
     <Content Remove="wwwroot\.DS_Store" />
     <Content Remove="wwwroot\setup\.DS_Store" />
     <Content Remove="wwwroot\setup\graphtoken\.DS_Store" />
+    <Content Remove="wwwroot\swagger-customisation\.DS_Store" />
+    <Content Remove="wwwroot\swagger-customisation\css\swagger-customisation.css" />
+    <Content Remove="wwwroot\swagger-customisation\js\swagger-customisation.js" />
+    <Content Remove="wwwroot\swagger-customisation\img\.DS_Store" />
+    <Content Remove="wwwroot\swagger-customisation\img\swagger.svg" />
+    <Content Remove="wwwroot\swagger-customisation\img\swagger-ico-proof.png" />
+    <Content Remove="wwwroot\favicon-32x32.png" />
+    <Content Remove="wwwroot\favicon-16x16.png" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" />
