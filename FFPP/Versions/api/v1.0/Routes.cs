@@ -414,7 +414,7 @@ namespace FFPP.Api.v10
             Auth authUserProfile =  await task;
 
             authUserProfile.clientPrincipal.photoData = await User.GetUserPhoto(authUserProfile.clientPrincipal.userId.ToString(), UserPhotoSize.Small, context.User.Claims.First(x => x.Type.ToLower().Contains("tenantid")).Value);
-            authUserProfile.clientPrincipal.defaultUseageLocation = await User.GetUserUseageLocation(context.User.Claims.First(x => x.Type.ToLower().Equals("http://schemas.microsoft.com/identity/claims/tenantid")).Value, authUserProfile.clientPrincipal.userId.ToString());
+            authUserProfile.clientPrincipal.defaultUsageLocation = await User.GetUserUseageLocation(context.User.Claims.First(x => x.Type.ToLower().Equals("http://schemas.microsoft.com/identity/claims/tenantid")).Value, authUserProfile.clientPrincipal.userId.ToString());
 
             // Check if profile exists, update and use if it does, create and use if it doesn't
 

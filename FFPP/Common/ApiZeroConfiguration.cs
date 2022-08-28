@@ -45,7 +45,7 @@ namespace FFPP.Common
 
             // step one - create SAM SPA that the Swagger UI will use to authenticate
 
-            JsonElement samSpa = (await Sam.CreateSAMAuthApp($"FFPP UI - {ApiEnvironment.DeviceTag}", Sam.SamAppType.Spa, domain, spaRedirectUri: new string[] { string.Format("{0}/swagger/oauth2-redirect.html", ApiEnvironment.FfppFrontEndUri.TrimEnd('/')), string.Format("{0}/index.html", ApiEnvironment.FfppFrontEndUri.TrimEnd('/'))})).sam;
+            JsonElement samSpa = (await Sam.CreateSAMAuthApp($"FFPP UI - {ApiEnvironment.DeviceTag}", Sam.SamAppType.Spa, domain, spaRedirectUri: new string[] { $"{ApiEnvironment.FfppFrontEndUri.TrimEnd('/')}/swagger/oauth2-redirect.html", $"{ApiEnvironment.KestrelHttps}/swagger/oauth2-redirect.html", $"{ApiEnvironment.FfppFrontEndUri.TrimEnd('/')}/index.html", $"{ApiEnvironment.KestrelHttps}/index.html",ApiEnvironment.FfppFrontEndUri.TrimEnd('/'), ApiEnvironment.KestrelHttps })).sam;
             string openIdClientId = samSpa.GetProperty("appId").GetString() ?? string.Empty;
             if (!openIdClientId.Equals(string.Empty))
             {
@@ -91,8 +91,8 @@ const config = {{
   auth: {{
     clientId: '{zeroConf.OpenIdClientId}',
     authority: 'https://login.microsoftonline.com/organizations/',
-    redirectUri: '/index.html',
-    postLogoutRedirectUri: '/bye.html'
+    redirectUri: '{ApiEnvironment.FfppFrontEndUri}',
+    postLogoutRedirectUri: '{ApiEnvironment.FfppFrontEndUri}/signedout'
   }},
   cache: {{
     cacheLocation: 'sessionStorage',
@@ -100,7 +100,12 @@ const config = {{
   }},
   api: {{
     scopes: ['{zeroConf.ApiScope}'],
-    requiresInit: true
+    swagger: {ApiEnvironment.RunSwagger.ToString().ToLower()},
+    deviceTag: '{await ApiEnvironment.GetDeviceTag()}'
+  }},
+  ui: {{
+    frontEndUrl: '{ApiEnvironment.FfppFrontEndUri}',
+    swaggerUi: {ApiEnvironment.ShowSwaggerUi.ToString().ToLower()}
   }}
 }};");
                 }

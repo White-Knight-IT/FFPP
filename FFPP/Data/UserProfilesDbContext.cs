@@ -88,7 +88,7 @@ namespace FFPP.Data
 
                     foundUser.name = userProfile.name;
                     foundUser.defaultPageSize = userProfile.defaultPageSize;
-                    foundUser.defaultUseageLocation = userProfile.defaultUseageLocation;
+                    foundUser.defaultUsageLocation = userProfile.defaultUsageLocation;
                     foundUser.identityProvider = userProfile.identityProvider;
                     foundUser.lastTenantCustomerId = userProfile.lastTenantCustomerId;
                     foundUser.lastTenantDomainName = userProfile.lastTenantDomainName;
@@ -147,7 +147,7 @@ namespace FFPP.Data
             public List<string>? userRoles { get; set; }
             public string? theme { get; set; }
             public int? defaultPageSize { get; set; }
-            public string? defaultUseageLocation { get; set; }
+            public string? defaultUsageLocation { get; set; }
             public string? lastTenantName { get; set; }
             public string? lastTenantDomainName { get; set; }
             public string? lastTenantCustomerId { get; set; }
