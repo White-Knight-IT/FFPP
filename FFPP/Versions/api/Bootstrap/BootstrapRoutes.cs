@@ -159,6 +159,7 @@ namespace FFPP.Api.Bootstrap
                     try
                     {
                         ApiEnvironment.Secrets.ExchangeRefreshToken = finalCode.GetProperty("refresh_token").GetString();
+                        Console.WriteLine($"Found token for device_code: {deviceCode}");
                         ApiZeroConfiguration zeroConf = await ApiZeroConfiguration.Read();
                         zeroConf.ExchangeRefreshToken = ApiEnvironment.Secrets.ExchangeRefreshToken;
                         zeroConf.IsBootstrapped = true;
@@ -171,9 +172,16 @@ namespace FFPP.Api.Bootstrap
 
                         Console.WriteLine($"Error getting Exchange Refresh Token: {ex.Message}");
                     }
+
+                    if(i==rounds)
+                    {
+                        Console.WriteLine($"Code has expired, giving up checking for Exchange token using device_code: {deviceCode}");
+                    }
                 }
                 Thread.CurrentThread.Join(interval * 1000);
             }
+
+            
         }
 
         public struct DeviceLogin

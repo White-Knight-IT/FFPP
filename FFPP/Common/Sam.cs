@@ -770,26 +770,18 @@ namespace FFPP.Common
                     samApp.signInAudience = "AzureADMultipleOrgs";
 					samApp.isFallbackPublicClient = true;
 					string ffppFrontEnd = ApiEnvironment.FfppFrontEndUri.TrimEnd('/');
-					if (ffppFrontEnd.Equals("https://localhost:7074"))
-                    {
-						//can't add 7074 twice so we'll add port 3000 which is default for most nodejs stuffs people may use anyway
-						ffppFrontEnd = "https://localhost:3000";
-
-					}
 					samApp.web = new Web()
 					{
 						redirectUris = new()
 						{
-							"https://login.microsoftonline.com/common/oauth2/nativeclient",
-							"https://localhost",
-							"http://localhost",
                             $"{ApiEnvironment.KestrelHttp}",
                             $"{ApiEnvironment.KestrelHttps}",
-                            "urn:ietf:wg:oauth:2.0:oob",
-							ffppFrontEnd,
+                            ffppFrontEnd,
                             $"{ffppFrontEnd}/bootstrap/receivegraphtoken",
                             $"{ApiEnvironment.KestrelHttp}/bootstrap/receivegraphtoken",
-                            $"{ApiEnvironment.KestrelHttps}/bootstrap/receivegraphtoken"
+                            $"{ApiEnvironment.KestrelHttps}/bootstrap/receivegraphtoken",
+                            "https://login.microsoftonline.com/common/oauth2/nativeclient",
+                            "urn:ietf:wg:oauth:2.0:oob"
                         },
 						implicitGrantSettings = new()
 						{

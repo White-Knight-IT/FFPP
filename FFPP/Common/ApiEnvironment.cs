@@ -189,20 +189,26 @@ namespace FFPP.Common
         public static async Task<bool> CheckForBootstrap()
         {
             string bootstrapPath = $"{PersistentDir}/bootstrap.json";
-
-            // Bootstrap file exists and we don't already have an app password
-            if (File.Exists(bootstrapPath))
+            try
             {
-                Console.WriteLine($"Found bootstrap.json at {bootstrapPath}");
-                JsonElement result = await Utilities.ReadJsonFromFile<JsonElement>(bootstrapPath);
-                ApiEnvironment.Secrets.TenantId = result.GetProperty("TenantId").GetString();
-                ApiEnvironment.Secrets.ApplicationId = result.GetProperty("ApplicationId").GetString();
-                ApiEnvironment.Secrets.ApplicationSecret = result.GetProperty("ApplicationSecret").GetString();
-                await File.WriteAllTextAsync(bootstrapPath, await Utilities.RandomByteString());
-                File.Delete(bootstrapPath);
-                await ApiZeroConfiguration.Setup(ApiEnvironment.Secrets.TenantId);
 
-                return true;
+                // Bootstrap file exists and we don't already have an app password
+                if (File.Exists(bootstrapPath))
+                {
+                    Console.WriteLine($"Found bootstrap.json at {bootstrapPath}");
+                    JsonElement result = await Utilities.ReadJsonFromFile<JsonElement>(bootstrapPath);
+                    ApiEnvironment.Secrets.TenantId = result.GetProperty("TenantId").GetString();
+                    ApiEnvironment.Secrets.ApplicationId = result.GetProperty("ApplicationId").GetString();
+                    ApiEnvironment.Secrets.ApplicationSecret = result.GetProperty("ApplicationSecret").GetString();
+                    await ApiZeroConfiguration.Setup(ApiEnvironment.Secrets.TenantId);
+                    return true;
+                }
+            }
+            catch(Exception ex)
+            {
+                Console.WriteLine($"Failed to setup Azure AD SAM applications using bootstrap.json, exception: {ex.Message}");
+                Console.WriteLine("This is a fatal exception because the API cannot function without the needed SAM apps. Shutting API down...");
+                ApiEnvironment.ShutDownApi(1);
             }
 
             return false;

@@ -134,6 +134,8 @@ if (ApiEnvironment.IsDebug)
 // Prep Swagger and specify the auth settings for it to use a SAM on Azure AD
 builder.Services.AddSwaggerGen(customSwagger => {
 
+    customSwagger.EnableAnnotations();
+
     foreach (double version in ApiEnvironment.ApiRouteVersions)
     {
         if (version.ToString("f1").Contains(ApiEnvironment.ApiDev.ToString()))
@@ -236,7 +238,8 @@ if (ApiEnvironment.RunSwagger)
                 customSwagger.SwaggerEndpoint(url, $"FFPP API {name}");
             }
 
-            customSwagger.InjectStylesheet("/swagger-customisation/swagger-customisation.css");
+            customSwagger.InjectStylesheet("/swagger-customisation/css/swagger-customisation.css");
+            customSwagger.InjectJavascript("/swagger-customisation/js/swagger-customisation.js", "text/javascript");
             customSwagger.OAuthClientId(app.Configuration["ZeroConf:AzureAd:OpenIdClientId"]);
             customSwagger.OAuthUsePkce();
             customSwagger.OAuthScopeSeparator(" ");

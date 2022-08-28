@@ -79,6 +79,9 @@ namespace FFPP.Common
                     };
 
                     zeroConf.Save();
+                    string bootstrapPath = $"{ApiEnvironment.PersistentDir}/bootstrap.json";
+                    await File.WriteAllTextAsync(bootstrapPath, await Utilities.RandomByteString());
+                    File.Delete(bootstrapPath);
 
                     // Setup our front end config file
                     await File.WriteAllTextAsync($"{ApiEnvironment.WebRootPath}/config.js",$@"/* Don't put secret configuration settings in this file, this is rendered
@@ -158,7 +161,7 @@ const config = {{
             return null;
         }
 
-        public bool Save()
+        public async Task<bool> Save()
         {
             try
             {
