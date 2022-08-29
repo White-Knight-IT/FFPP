@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FFPP.Migrations.UserProfilesDbContext_Migrations
 {
     [DbContext(typeof(UserProfilesDbContext))]
-    [Migration("20220814191142_InitialCreate_UserProfilesDbContext")]
+    [Migration("20220829022138_InitialCreate_UserProfilesDbContext")]
     partial class InitialCreate_UserProfilesDbContext
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -30,7 +30,7 @@ namespace FFPP.Migrations.UserProfilesDbContext_Migrations
                     b.Property<int?>("defaultPageSize")
                         .HasColumnType("int");
 
-                    b.Property<string>("defaultUseageLocation")
+                    b.Property<string>("defaultUsageLocation")
                         .HasColumnType("longtext");
 
                     b.Property<string>("identityProvider")

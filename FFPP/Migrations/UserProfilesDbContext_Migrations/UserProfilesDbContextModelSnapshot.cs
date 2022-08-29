@@ -28,7 +28,7 @@ namespace FFPP.Migrations.UserProfilesDbContext_Migrations
                     b.Property<int?>("defaultPageSize")
                         .HasColumnType("int");
 
-                    b.Property<string>("defaultUseageLocation")
+                    b.Property<string>("defaultUsageLocation")
                         .HasColumnType("longtext");
 
                     b.Property<string>("identityProvider")

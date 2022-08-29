@@ -26,7 +26,7 @@ namespace FFPP.Migrations.UserProfilesDbContext_Migrations
                     theme = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     defaultPageSize = table.Column<int>(type: "int", nullable: true),
-                    defaultUseageLocation = table.Column<string>(type: "longtext", nullable: true)
+                    defaultUsageLocation = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
                     lastTenantName = table.Column<string>(type: "longtext", nullable: true)
                         .Annotation("MySql:CharSet", "utf8mb4"),
