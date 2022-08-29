@@ -4102,6 +4102,15 @@
     <Content Remove="wwwroot\swagger-customisation\img\swagger-ico-proof.png" />
     <Content Remove="wwwroot\favicon-32x32.png" />
     <Content Remove="wwwroot\favicon-16x16.png" />
+    <Content Remove="wwwroot\403\index.html" />
+    <Content Remove="wwwroot\signout\index.html" />
+    <Content Remove="wwwroot\swagger\favicon-16x16.png" />
+    <Content Remove="wwwroot\swagger\.DS_Store" />
+    <Content Remove="wwwroot\swagger\favicon-32x32.png" />
+    <Content Remove="wwwroot\swagger\css\swagger-customisation.css" />
+    <Content Remove="wwwroot\swagger\js\swagger-customisation.js" />
+    <Content Remove="wwwroot\swagger\img\.DS_Store" />
+    <Content Remove="wwwroot\swagger\img\swagger.svg" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\.editorconfig" />
