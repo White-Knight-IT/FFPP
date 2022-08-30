@@ -45,17 +45,17 @@ ApiEnvironment.ShowDevEnvEndpoints = builder.Configuration.GetValue<bool>("ApiSe
 ApiEnvironment.ShowSwaggerUi = builder.Configuration.GetValue<bool>("ApiSettings:ShowSwaggerUi");
 ApiEnvironment.RunSwagger = builder.Configuration.GetValue<bool>("ApiSettings:RunSwagger");
 ApiEnvironment.ServeStaticFiles = builder.Configuration.GetValue<bool>("ApiSettings:ServeStaticFiles");
-ApiEnvironment.MysqlUser = builder.Configuration.GetValue<string>("ApiSettings:DbSettings:MysqlUser") ?? "ffppapiservice";
-ApiEnvironment.MysqlPassword = builder.Configuration.GetValue<string>("ApiSettings:DbSettings:MysqlPassword") ?? "wellknownpassword";
-ApiEnvironment.MysqlServer = builder.Configuration.GetValue<string>("ApiSettings:DbSettings:MysqlServer") ?? "localhost";
-ApiEnvironment.MysqlServerPort = builder.Configuration.GetValue<string>("ApiSettings:DbSettings:MysqlServerPort") ?? "7704";
-ApiEnvironment.CacheDir = builder.Configuration.GetValue<string>("ApiSettings:CachePath") ?? $"{ApiEnvironment.DataDir}/Cache";
-ApiEnvironment.PersistentDir = builder.Configuration.GetValue<string>("ApiSettings:PersistentPath") ?? ApiEnvironment.WorkingDir;
-ApiEnvironment.WebRootPath = builder.Configuration.GetValue<string>("ApiSettings:WebRootPath") ?? $"{ApiEnvironment.WorkingDir}/wwwroot";
-ApiEnvironment.FfppFrontEndUri = builder.Configuration.GetValue<string>("ApiSettings:WebUiUrl").TrimEnd('/') ?? "http://localhost";
+ApiEnvironment.MysqlUser = builder.Configuration.GetValue<string>("ApiSettings:DbSettings:MysqlUser").Trim() ?? "ffppapiservice";
+ApiEnvironment.MysqlPassword = builder.Configuration.GetValue<string>("ApiSettings:DbSettings:MysqlPassword").Trim() ?? "wellknownpassword";
+ApiEnvironment.MysqlServer = builder.Configuration.GetValue<string>("ApiSettings:DbSettings:MysqlServer").Trim() ?? "localhost";
+ApiEnvironment.MysqlServerPort = builder.Configuration.GetValue<string>("ApiSettings:DbSettings:MysqlServerPort").Trim() ?? "7704";
+ApiEnvironment.CacheDir = builder.Configuration.GetValue<string>("ApiSettings:CachePath").Trim() ?? $"{ApiEnvironment.DataDir}/Cache";
+ApiEnvironment.PersistentDir = builder.Configuration.GetValue<string>("ApiSettings:PersistentPath").Trim() ?? ApiEnvironment.WorkingDir;
+ApiEnvironment.WebRootPath = builder.Configuration.GetValue<string>("ApiSettings:WebRootPath").Trim() ?? $"{ApiEnvironment.WorkingDir}/wwwroot";
+ApiEnvironment.FfppFrontEndUri = builder.Configuration.GetValue<string>("ApiSettings:WebUiUrl").TrimEnd('/').Trim() ?? "http://localhost";
 ApiEnvironment.DeviceTag = await ApiEnvironment.GetDeviceTag();
-ApiEnvironment.KestrelHttps = builder.Configuration.GetValue<string>("Kestrel:Endpoints:Https:Url") ?? "https://localhost:7074";
-ApiEnvironment.KestrelHttp = builder.Configuration.GetValue<string>("Kestrel:Endpoints:Http:Url") ?? "https://localhost:7073";
+ApiEnvironment.KestrelHttps = builder.Configuration.GetValue<string>("Kestrel:Endpoints:Https:Url").Trim() ?? "https://localhost:7074";
+ApiEnvironment.KestrelHttp = builder.Configuration.GetValue<string>("Kestrel:Endpoints:Http:Url").Trim() ?? "https://localhost:7073";
 
 // Build Data/Cache directories if they don't exist
 ApiEnvironment.DataAndCacheDirectoriesBuild();
