@@ -60,7 +60,7 @@ namespace FFPP.Api.v10
 
 
             /// <summary>
-            /// /v1.0//EditUserProfile
+            /// /v1.0/EditUserProfile
             /// </summary>
             app.MapPut("/v{version:apiVersion}/EditUserProfile", async (HttpContext context, UserProfilesDbContext.UserProfile inputProfile, bool? updatePhoto) =>
             {

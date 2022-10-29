@@ -67,6 +67,7 @@ namespace FFPP.Common
         public static string KestrelHttps = "https://localhost:7074";
         public static long RunErrorCount = 0;
         public static bool IsBoostrapped = false;
+        public static List<AccessToken> AccessTokenCache = new();
         /// <summary>
         /// Build data directories including cache directories if they don't exist
         /// </summary>
@@ -287,6 +288,16 @@ namespace FFPP.Common
 
             public bool refreshToken { get; set; }
             public bool exchangeRefreshToken { get; set; }
+        }
+
+        public struct AccessToken
+        {
+            public string AppId { get; set; }
+            public bool AsApp { get; set; }
+            public string TenantId { get; set; }
+            public string Scope { get; set; }
+            public string Token { get; set; }
+            public long Expires { get; set; }
         }
 
         /// <summary>

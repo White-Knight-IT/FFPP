@@ -793,8 +793,14 @@ namespace FFPP.Common
 					JsonElement createdSamApp = await RequestHelper.NewGraphPostRequest("https://graph.microsoft.com/v1.0/applications", ApiEnvironment.Secrets.TenantId, samApp, HttpMethod.Post, "https://graph.microsoft.com/.default", true);
                     Console.WriteLine("Waiting 30 seconds for app to progagate through Azure before setting a password on it...");
                     await Task.Delay(30000); // Have to wait about 30 seconds for Azure to properly replicate the app before we can set password on it
-					var appPasswordJson = await RequestHelper.NewGraphPostRequest(string.Format("https://graph.microsoft.com/v1.0/applications/{0}/addPassword", createdSamApp.GetProperty("id").GetString()), ApiEnvironment.Secrets.TenantId, new PasswordCredential() { displayName="FFPP-Pwd" }, HttpMethod.Post, "https://graph.microsoft.com/.default", true);
-					return new() { sam=createdSamApp, appPassword=appPasswordJson.GetProperty("secretText").GetString() ?? string.Empty };
+					var appPasswordJson = await RequestHelper.NewGraphPostRequest($"https://graph.microsoft.com/v1.0/applications/{createdSamApp.GetProperty("id").GetString()}/addPassword", ApiEnvironment.Secrets.TenantId, new PasswordCredential() { displayName="FFPP-Pwd" }, HttpMethod.Post, "https://graph.microsoft.com/.default", true);
+					var servicePrincipleJson = await RequestHelper.NewGraphPostRequest("https://graph.microsoft.com/v1.0/servicePrincipals", ApiEnvironment.Secrets.TenantId, new AppId() { appId = createdSamApp.GetProperty("appId").GetString() }, HttpMethod.Post, "https://graph.microsoft.com/.default", true);
+					var adminAgentGroupJson = await RequestHelper.NewGraphGetRequest("https://graph.microsoft.com/v1.0/groups?$filter=startswith(displayName,'AdminAgents')&$select=id", ApiEnvironment.Secrets.TenantId,"https://graph.microsoft.com/.default", true);
+					string jsonString = $@"{{""@odata.id"":""https://graph.microsoft.com/v1.0/servicePrincipals/{servicePrincipleJson.GetProperty("id").GetString()}""}}";
+                    Console.WriteLine("Waiting 30 seconds for Service Principal to progagate through Azure before assigning it as a member of AdminAgents group...");
+                    await Task.Delay(30000);
+                    await RequestHelper.NewGraphPostRequest($"https://graph.microsoft.com/v1.0/groups/{adminAgentGroupJson[0].GetProperty("id").GetString()}/members/$ref", ApiEnvironment.Secrets.TenantId, JsonSerializer.Deserialize<JsonElement>(jsonString),HttpMethod.Post, "https://graph.microsoft.com/.default", true);
+                    return new() { sam=createdSamApp, appPassword=appPasswordJson.GetProperty("secretText").GetString() ?? string.Empty };
 
 				case SamAppType.Spa:
                     samApp = new ExpandoObject();
@@ -891,6 +897,11 @@ namespace FFPP.Common
 		{
 			public string displayName { get; set; }
 		}
+
+		public struct AppId
+        {
+			public string appId { get; set; }
+        }
     }
 }
 

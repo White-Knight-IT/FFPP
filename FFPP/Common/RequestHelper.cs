@@ -1,8 +1,11 @@
-﻿using System.Net.Http.Headers;
+﻿using System.Net;
+using System.Net.Http.Headers;
 using System.Web;
 using System.Text.Json;
 using FFPP.Api.v10.Tenants;
 using FFPP.Data.Logging;
+using Microsoft.Graph;
+using static System.Net.WebRequestMethods;
 
 namespace FFPP.Common
 {
@@ -47,16 +50,16 @@ namespace FFPP.Common
 
 			if (asApp)
 			{
-				authBody = string.Format("client_id={0}&client_secret={1}&scope={2}&grant_type=client_credentials", HttpUtility.UrlEncode(ApiEnvironment.Secrets.ApplicationId), HttpUtility.UrlEncode(ApiEnvironment.Secrets.ApplicationSecret), HttpUtility.UrlEncode(scope));
+				authBody = $"client_id={HttpUtility.UrlEncode(ApiEnvironment.Secrets.ApplicationId)}&client_secret={HttpUtility.UrlEncode(ApiEnvironment.Secrets.ApplicationSecret)}&scope={HttpUtility.UrlEncode(scope)}&grant_type=client_credentials";
 			}
 			else
 			{
-				authBody = string.Format("client_id={0}&client_secret={1}&scope={2}&refresh_token={3}&grant_type=refresh_token", ApiEnvironment.Secrets.ApplicationId, ApiEnvironment.Secrets.ApplicationSecret, scope, ApiEnvironment.Secrets.RefreshToken);
+				authBody = $"client_id={ApiEnvironment.Secrets.ApplicationId}&client_secret={ApiEnvironment.Secrets.ApplicationSecret}&scope={scope}&refresh_token={ApiEnvironment.Secrets.RefreshToken}&grant_type=refresh_token";
 			}
 
 			if (!string.IsNullOrEmpty(appId) && !string.IsNullOrEmpty(refreshToken))
 			{
-				authBody = string.Format("client_id={0}&refresh_token={1}&scope={2}&grant_type=refresh_token", appId, refreshToken, scope);
+				authBody = $"client_id={appId}&refresh_token={refreshToken}&scope={scope}&grant_type=refresh_token";
 			}
 
 			if (string.IsNullOrEmpty(tenantId))
@@ -64,7 +67,22 @@ namespace FFPP.Common
 				tenantId = ApiEnvironment.Secrets.TenantId;
 			}
 
-			using HttpRequestMessage requestMessage = new(HttpMethod.Post, string.Format("https://login.microsoftonline.com/{0}/oauth2/v2.0/token", tenantId));
+			if(!returnRefresh)
+            {
+				ApiEnvironment.AccessToken accessToken = ApiEnvironment.AccessTokenCache.Find(x => x.AppId.Equals(appId) && x.AsApp.Equals(asApp) && x.Scope.Equals(scope) && x.TenantId.Equals(tenantId));
+				if (!string.IsNullOrEmpty(accessToken.Token))
+                {
+					if (accessToken.Expires > DateTimeOffset.Now.Subtract(new TimeSpan(3000000000)).ToUnixTimeSeconds())
+					{
+						return new Dictionary<string, string> { ["Authorization"] = accessToken.Token };
+					}
+
+					// Remove expired accessToken from cache
+					ApiEnvironment.AccessTokenCache.Remove(accessToken);
+                }
+            }
+
+			using HttpRequestMessage requestMessage = new(HttpMethod.Post, $"https://login.microsoftonline.com/{tenantId}/oauth2/v2.0/token");
 			{
 				requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", refreshToken);
 				requestMessage.Content = new StringContent(authBody);
@@ -102,8 +120,18 @@ namespace FFPP.Common
 						return headers;
 					}
 
-					return new Dictionary<string, string> { ["Authorization"] = headers.GetValueOrDefault("access_token", string.Empty) };
+					string accessToken = headers.GetValueOrDefault("access_token", string.Empty);
+					ApiEnvironment.AccessTokenCache.Add(new() { AppId = appId, AsApp = asApp, Scope = scope, TenantId = tenantId, Token = accessToken, Expires = (await ReadJwtv1AccessDetails(accessToken)).Expires });
+
+                    return new Dictionary<string, string> { ["Authorization"] =  accessToken};
 				}
+				else if(responseMessage.StatusCode == HttpStatusCode.TooManyRequests)
+				{
+                    // Sleep 1 second if we get a 429 and retry
+                    Console.WriteLine($"Got a 429 too many requests to GetGraphToken, waiting 1 second and retrying...");
+                    Thread.CurrentThread.Join(1020);
+					return await GetGraphToken(tenantId, asApp, appId, refreshToken, scope, returnRefresh);
+                }
 
                 ApiEnvironment.RunErrorCount++;
 
@@ -145,7 +173,7 @@ namespace FFPP.Common
 				headers = await GetGraphToken(tenantId, asApp, string.Empty, string.Empty, scope);
 			}
 
-			FfppLogsDbContext.DebugConsoleWrite(string.Format("Using {0} as url", uri));
+			FfppLogsDbContext.DebugConsoleWrite($"Using {uri} as url");
 
 			string nextUrl = uri;
 
@@ -207,7 +235,14 @@ namespace FFPP.Common
 									}
                                 }
 							}
-							else
+                            else if (responseMessage.StatusCode == HttpStatusCode.TooManyRequests)
+                            {
+                                // Sleep 1 second if we get a 429 and retry
+                                Console.WriteLine($"Got a 429 too many requests to {uri}, waiting 1 second and retrying...");
+                                Thread.CurrentThread.Join(1020);
+								return await NewGraphGetRequest(uri, tenantId, scope, asApp, noPagination);
+                            }
+                            else
 							{
                                 ApiEnvironment.RunErrorCount++;
                                 nextUrl = string.Empty;
@@ -274,7 +309,7 @@ namespace FFPP.Common
 				headers = await GetGraphToken(tenantId, asApp, string.Empty, string.Empty, scope);
 			}
 
-			FfppLogsDbContext.DebugConsoleWrite(string.Format("Using {0} as url", uri));
+			FfppLogsDbContext.DebugConsoleWrite($"Using {uri} as url");
 
 			if (await GetAuthorisedRequest(tenantId, uri))
 			{
@@ -306,7 +341,14 @@ namespace FFPP.Common
 							data = await responseMessage.Content.ReadAsStringAsync();
 
 						}
-						else
+                        else if (responseMessage.StatusCode == HttpStatusCode.TooManyRequests)
+                        {
+                            // Sleep 1 second if we get a 429 and retry
+                            Console.WriteLine($"Got a 429 too many requests to {uri}, waiting 1 second and retrying...");
+                            Thread.CurrentThread.Join(1020);
+                            return await NewGraphGetRequestString(uri, tenantId, scope, asApp, contentHeader);
+                        }
+                        else
 						{
                             ApiEnvironment.RunErrorCount++;
 
@@ -368,7 +410,7 @@ namespace FFPP.Common
 				headers = await GetGraphToken(tenantId, asApp, string.Empty, string.Empty, scope);
 			}
 
-			FfppLogsDbContext.DebugConsoleWrite(string.Format("Using {0} as url", uri));
+			FfppLogsDbContext.DebugConsoleWrite($"Using {uri} as url");
 
 			if (await GetAuthorisedRequest(tenantId, uri))
 			{
@@ -400,7 +442,14 @@ namespace FFPP.Common
 							data.AddRange(await responseMessage.Content.ReadAsByteArrayAsync());
 
 						}
-						else
+                        else if (responseMessage.StatusCode == HttpStatusCode.TooManyRequests)
+                        {
+							// Sleep 1 second if we get a 429 and retry
+							Console.WriteLine($"Got a 429 too many requests to {uri}, waiting 1 second and retrying...");
+                            Thread.CurrentThread.Join(1020);
+                            return await NewGraphGetRequestBytes(uri, tenantId, scope, asApp, contentHeader);
+                        }
+                        else
 						{
                             ApiEnvironment.RunErrorCount++;
 
@@ -453,7 +502,7 @@ namespace FFPP.Common
 		{
 			Dictionary<string, string> headers = await GetGraphToken(tenantId, asApp, string.Empty, string.Empty, scope);
 
-			FfppLogsDbContext.DebugConsoleWrite(string.Format("Using {0} as url", uri));
+			FfppLogsDbContext.DebugConsoleWrite($"Using {uri} as url");
 
 			if (await GetAuthorisedRequest(tenantId, uri))
 			{
@@ -479,9 +528,24 @@ namespace FFPP.Common
 
 						if (responseMessage.IsSuccessStatusCode)
 						{
-							JsonDocument jsonDoc = await JsonDocument.ParseAsync(new MemoryStream(await responseMessage.Content.ReadAsByteArrayAsync()));
-							return jsonDoc.RootElement;
+							if (responseMessage.StatusCode != HttpStatusCode.NoContent)
+							{
+								JsonDocument jsonDoc = await JsonDocument.ParseAsync(new MemoryStream(await responseMessage.Content.ReadAsByteArrayAsync()));
+								return jsonDoc.RootElement;
+							}
+                            else
+							{
+								// HTTP 204 No Content so returning empty JsonElement
+								return new JsonElement();
+							}
 						}
+                        else if (responseMessage.StatusCode == HttpStatusCode.TooManyRequests)
+                        {
+                            // Sleep 1 second if we get a 429 and retry
+                            Console.WriteLine($"Got a 429 too many requests to {uri}, waiting 1 second and retrying...");
+                            Thread.CurrentThread.Join(1020);
+                            return await NewGraphPostRequest(uri,tenantId,body,type,scope,asApp);
+                        }
 
                         ApiEnvironment.RunErrorCount++;
 
@@ -540,6 +604,13 @@ namespace FFPP.Common
 				JsonDocument jsonDoc = await JsonDocument.ParseAsync(new MemoryStream(await responseMessage.Content.ReadAsByteArrayAsync()));
 				return jsonDoc.RootElement;
 			}
+            else if (responseMessage.StatusCode == HttpStatusCode.TooManyRequests)
+            {
+                // Sleep 1 second if we get a 429 and retry
+                Console.WriteLine($"Got a 429 too many requests to get classic API token, waiting 1 second and retrying...");
+                Thread.CurrentThread.Join(1020);
+				return await GetClassicApiToken(tenantId, resource);
+            }
 
             ApiEnvironment.RunErrorCount++;
 
@@ -584,7 +655,7 @@ namespace FFPP.Common
 		{
 			string token = (await GetClassicApiToken(tenantId, resource)).GetProperty("access_token").ToString();
 
-			FfppLogsDbContext.DebugConsoleWrite(string.Format("Using {0} as url in classic API GET request", uri));
+			FfppLogsDbContext.DebugConsoleWrite($"Using {uri} as url in classic API GET request");
 
 			string nextUrl = uri;
 
@@ -632,7 +703,14 @@ namespace FFPP.Common
                                     }
                                 }
 							}
-							else
+                            else if (responseMessage.StatusCode == HttpStatusCode.TooManyRequests)
+                            {
+                                // Sleep 1 second if we get a 429 and retry
+                                Console.WriteLine($"Got a 429 too many requests to get classic API token, waiting 1 second and retrying...");
+                                Thread.CurrentThread.Join(1020);
+                                return await NewClassicApiGetRequest(uri, tenantId, httpMethod, resource, contentType, noPagination, headers);
+                            }
+                            else
 							{
                                 ApiEnvironment.RunErrorCount++;
 
@@ -724,9 +802,15 @@ namespace FFPP.Common
 						{
 							JsonDocument jsonDoc = await JsonDocument.ParseAsync(new MemoryStream(await responseMessage.Content.ReadAsByteArrayAsync()));
 							data = jsonDoc.RootElement;
-
 						}
-						else
+                        else if (responseMessage.StatusCode == HttpStatusCode.TooManyRequests)
+                        {
+                            // Sleep 1 second if we get a 429 and retry
+                            Console.WriteLine($"Got a 429 too many requests to get {uri}, waiting 1 second and retrying...");
+                            Thread.CurrentThread.Join(1020);
+                            return await NewClassicApiPostRequest(tenantId, uri, httpMethod, body, resource, headers);
+                        }
+                        else
 						{
                             ApiEnvironment.RunErrorCount++;
 
@@ -799,6 +883,13 @@ namespace FFPP.Common
 						JsonDocument jsonDoc = await JsonDocument.ParseAsync(new MemoryStream(await responseMessage.Content.ReadAsByteArrayAsync()));
 						returnData = jsonDoc.RootElement.GetProperty("value");
 					}
+                    else if (responseMessage.StatusCode == HttpStatusCode.TooManyRequests)
+                    {
+                        // Sleep 1 second if we get a 429 and retry
+                        Console.WriteLine($"Got a 429 too many requests NewExoRequest ({cmdLet}), waiting 1 second and retrying...");
+                        Thread.CurrentThread.Join(1020);
+						return await NewExoRequest(tenantId, cmdLet, cmdParams);
+                    }
 
                     ApiEnvironment.RunErrorCount++;
 
@@ -866,7 +957,14 @@ namespace FFPP.Common
 
 				responseMessage = await SendHttpRequest(requestMessage);
 
-				if (!responseMessage.IsSuccessStatusCode)
+                if (responseMessage.StatusCode == HttpStatusCode.TooManyRequests)
+                {
+                    // Sleep 1 second if we get a 429 and retry
+                    Console.WriteLine($"Got a 429 too many requests to NewDeviceLogin, waiting 1 second and retrying...");
+                    Thread.CurrentThread.Join(1020);
+					return await NewDeviceLogin(clientId, scope, firstLogon, device_code, tenantId);
+                }
+                else if(!responseMessage.IsSuccessStatusCode)
                 {
                     ApiEnvironment.RunErrorCount++;
 
@@ -903,7 +1001,7 @@ namespace FFPP.Common
 		/// </summary>
 		public struct TokenDetails
 		{
-			public TokenDetails(string appId = "", string appName = "", string audience = "", string authMethods = "", string iPAddress = "", string name = "", string scope = "", string tenantId = "", string userPrincipleName = "")
+			public TokenDetails(string appId = "", string appName = "", string audience = "", string authMethods = "", string iPAddress = "", string name = "", string scope = "", string tenantId = "", string userPrincipleName = "", string roles = "", long exp = 0, string token = "")
 			{
 				AppId = appId;
 				AppName = appName;
@@ -911,9 +1009,14 @@ namespace FFPP.Common
 				AuthMethods = authMethods;
 				IpAddress = iPAddress;
 				Name = name;
-				Scope = scope.Split(' ');
+                Roles = roles;
+				ScopeString = scope;
+                Scope = scope.Split(' ');
 				TenantId = tenantId;
 				UserPrincipalName = userPrincipleName;
+				Expires = exp;
+				AccessToken = token;
+				 
 			}
 
 			public string AppId { get; }
@@ -922,10 +1025,14 @@ namespace FFPP.Common
 			public string AuthMethods { get; }
 			public string IpAddress { get; }
 			public string Name { get; }
-			public string[] Scope { get; }
+            public string Roles { get; }
+			public string ScopeString { get; }
+            public string[] Scope { get; }
 			public string TenantId { get; }
 			public string UserPrincipalName { get; }
-		}
+			public long Expires { get; }
+			public string AccessToken { get; }
+        }
 
 		/// <summary>
 		/// Converts a JWT v1 token into a JSON object
@@ -944,8 +1051,13 @@ namespace FFPP.Common
 			byte[] tokenPayload = Utilities.Base64UrlDecode(token.Split('.')[1]);
 			string appName = string.Empty;
 			string upn = string.Empty;
+			string amr = string.Empty;
+            string ipaddr = string.Empty;
+            string name = string.Empty;
+            string scp = string.Empty;
+            string roles = string.Empty;
 
-			JsonElement jsonToken = (await JsonDocument.ParseAsync(new MemoryStream(tokenPayload))).RootElement;
+            JsonElement jsonToken = (await JsonDocument.ParseAsync(new MemoryStream(tokenPayload))).RootElement;
 
 			if (jsonToken.TryGetProperty("app_displayname", out JsonElement appNameJson))
 			{
@@ -961,9 +1073,34 @@ namespace FFPP.Common
 				upn = upnJson.GetString() ?? string.Empty;
 			}
 
-			return new(jsonToken.GetProperty("appid").ToString(), appName,
-				jsonToken.GetProperty("aud").ToString(), jsonToken.GetProperty("amr").ToString(), jsonToken.GetProperty("ipaddr").ToString(),
-				jsonToken.GetProperty("name").ToString(), jsonToken.GetProperty("scp").ToString(), jsonToken.GetProperty("tid").ToString(), upn);
+			if (jsonToken.TryGetProperty("amr", out JsonElement amrJson))
+			{
+				amr = jsonToken.GetProperty("amr").ToString();
+            }
+
+            if (jsonToken.TryGetProperty("ipaddr", out JsonElement ipaddrJson))
+            {
+                ipaddr = ipaddrJson.GetString() ?? string.Empty;
+            }
+
+            if (jsonToken.TryGetProperty("name", out JsonElement nameJson))
+            {
+                name = nameJson.GetString() ?? string.Empty;
+            }
+
+            if (jsonToken.TryGetProperty("scp", out JsonElement scpJson))
+            {
+                scp = scpJson.GetString() ?? string.Empty;
+            }
+
+            if (jsonToken.TryGetProperty("roles", out JsonElement rolesJson))
+            {
+                roles = jsonToken.GetProperty("roles").ToString() ?? string.Empty;
+            }
+
+            return new(jsonToken.GetProperty("appid").ToString(), appName,
+				jsonToken.GetProperty("aud").ToString(),amr, ipaddr,
+				name, scp, jsonToken.GetProperty("tid").ToString(), upn, roles, long.Parse(jsonToken.GetProperty("exp").ToString()));
 		}
 
 		/// <summary>
@@ -991,7 +1128,9 @@ namespace FFPP.Common
 		private async static Task<bool> GetAuthorisedRequest(string tenantId, string uri = "")
 		{
 			if (uri.ToLower().Contains("https://graph.microsoft.com/beta/contracts") || uri.ToLower().Contains("/customers/") ||
-				uri.ToLower().Equals("https://graph.microsoft.com/v1.0/me/sendmail") ||
+                uri.ToLower().Contains("https://graph.microsoft.com/v1.0/serviceprincipals") ||
+                uri.ToLower().Contains("https://graph.microsoft.com/v1.0/groups") ||
+                uri.ToLower().Equals("https://graph.microsoft.com/v1.0/me/sendmail") ||
 				uri.ToLower().Contains("https://graph.microsoft.com/beta/tenantrelationships/managedtenants") ||
 				(uri.ToLower().Contains("https://graph.microsoft.com/v1.0/applications") && tenantId.Equals(ApiEnvironment.Secrets.TenantId)) ||
 				(uri.ToLower().Contains("https://graph.microsoft.com/beta/domains") && tenantId.Equals(ApiEnvironment.Secrets.TenantId)) ||
